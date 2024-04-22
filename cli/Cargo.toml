@@ -1,0 +1,6 @@
+[package]
+name = "tool_cli"  # Replace with your project's name
+version = "0.1.0"           # The current version of your project
+
+[dependencies]
+parser_lib = { path = "../../pray_engine" }
