@@ -1,10 +1,4 @@
-// use notcurses::*;
-//
-// fn main() -> Result<()> {
-//     let mut nc = Notcurses::new_cli()?;
-//     let mut cli = nc.cli_plane()?;
-//     cli.putstrln("\nhello world!")?;
-//     cli.render()?;
-//     Ok(())
-// }
-fn main() {}
+fn main() {
+    let path = std::env::args().nth(1).expect("path to config file");
+    println!("path: {:?}", path);
+}
