@@ -3,8 +3,6 @@ trait ISpawner<T> {
     fn setup(ref world: IWorldDispatcher);
 }
 
-// {{ levels[0] }}
-
 #[dojo::contract]
 pub mod spawner {
     use core::byte_array::ByteArrayTrait;
@@ -82,19 +80,20 @@ pub mod spawner {
             dBitTxt: "the path winds east, it is open", enabled: true, 
             revertable: false, dBit: true, 
             affectsActionId: 0, affectedByActionId: 0};
-        action_{{exit.exitID}}.actionId = h_util::action_hash(@action_{{exit.exitID}});
+        let action_id = h_util::action_hash(@action_{{exit.exitID}});
+        action_{{exit.exitID}}.actionId = action_id;
 
         
         let path_desc: ByteArray = "a path east leads upwards toward the mountains"; // TODO
         let td_id_p = h_util::str_hash(@path_desc); // text id
-        let east_dest_name: ByteArray = "walking eagle pass"; // TODO
+        let dest_name: ByteArray = "walking eagle pass"; // TODO
         let mut path_{{exit.exitID}} = Object{
             objectId: st::SETME, 
             objType: zrk::ObjectType::Path, 
             dirType: zrk::DirectionType::East, // TODO
-            destId: h_util::str_hash(@east_dest_name), 
+            destId: h_util::str_hash(@dest_name), 
             matType: zrk::MaterialType::Dirt,
-            objectActionIds: array![ae_id],
+            objectActionIds: array![action_id],
             txtDefId: td_id_p 
          };
 
