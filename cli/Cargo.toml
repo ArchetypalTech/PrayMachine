@@ -1,10 +1,13 @@
 [package]
-name = "letuspray"  # Replace with your project's name
-version = "0.1.0"           # The current version of your project
+name = "letuspray"
+version = "0.1.0"
+edition = "2021"
 
 [dependencies]
 pray_engine = { path = "../parser" }
-tuirealm = "^1.9.0"
+tera = "1"
+serde = "1.0"
+serde_yml = "0.0.12"
 
 [[bin]]
 name = 'pray'

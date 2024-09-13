@@ -1,0 +1,44 @@
+levels:
+  - levelName: "a wake up call"
+    rooms:
+      - roomID: 1
+        roomName: "wake up pass"
+        roomDescription: "a high mountain pass winding through the gtaefk hills. The pass is narrow and flanked by steep sided valleys falling off to the east and the west"
+        exits:
+          - exitID: 1
+            direction: "W"
+            type: "path"
+            material: "dirt"
+            isOpen: true
+        objects:
+          - objID: 1
+            type: Football
+            objDescription: "a cheap shoplifted uefa football. not quite round, kickable"
+            actions:
+              - actionID: 1
+                type: "kick"
+                defaultResponse: "the balls rolls feebly away as you fluff the kick and lands in some dog shit"
+      - roomID: 2
+        roomName: "bensons plain"
+        roomDescription: "a barren plain. The air is greasy with the taste of bensons"
+        exits:
+          - exitID: 1
+            direction: "W"
+            isOpen: true
+          - exitID: 2
+            direction: "N"
+            isOpen: true
+      - roomID: 3
+        roomName: "eli's barn"
+        roomDescription: "a deserted barn, covered in cobwebs and litetred with broken glass and old hay, it does not smell of hay, you would prefer it dd not smell at all"
+        exits:
+          - exitID: 1
+            direction: "E"
+            type: "window"
+            material: "glass"
+            isOpen: false
+            changeByAction: "break"
+            changeResponse: "the window shatters into a thousand pieces"
+          - exitID: 2
+            direction: "S"
+            isOpen: true

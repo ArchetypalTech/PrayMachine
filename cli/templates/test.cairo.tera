@@ -1,0 +1,69 @@
+#[dojo::interface]
+trait ISpawner<T> {
+    fn setup(ref world: IWorldDispatcher);
+}
+
+// {{ levels[0] }}
+
+#[dojo::contract]
+pub mod spawner {
+    use core::byte_array::ByteArrayTrait;
+    use core::array::ArrayTrait;
+    use core::option::OptionTrait;
+    use super::ISpawner;
+
+    use the_oruggin_trail::models::{
+        zrk_enums as zrk, txtdef::{Txtdef}, action::{Action}, object::{Object}, room::{Room}
+    };
+
+    use the_oruggin_trail::constants::zrk_constants as zc;
+    use the_oruggin_trail::constants::zrk_constants::{roomid as rm, statusid as st};
+
+    use the_oruggin_trail::lib::hash_utils::hashutils as h_util;
+
+
+    #[abi(embed_v0)]
+    impl SpawnerImpl of ISpawner<ContractState> {
+        fn setup(ref world: IWorldDispatcher) {
+            make_rooms(world, 23);
+        }
+    }
+
+    fn store_objects(w: IWorldDispatcher, t: Array<Object>) {
+        let mut i = 0;
+        while i < t.len() {
+            let a: Object = t.at(i).clone();
+            set!(w, (a));
+            i += 1 + i;
+        }
+    }
+
+    fn store_actions(w: IWorldDispatcher, t: Array<Action>) {
+        let mut i = 0;
+        while i < t.len() {
+            let a: Action = t.at(i).clone();
+            set!(w, (a));
+            i += 1 + i;
+        }
+    }
+
+    fn store_places(w: IWorldDispatcher, t: Array<Room>) {
+        let mut i = 0;
+        while i < t.len() {
+            let a: Room = t.at(i).clone();
+            set!(w, (a));
+            i += 1 + i;
+        }
+    }
+
+    fn store_txt(world: IWorldDispatcher, id: felt252, ownedBy: felt252, val: ByteArray) {
+        set!(world, (Txtdef { id: id, owner: ownedBy, text: val },));
+    }
+
+
+    fn make_rooms(w: IWorldDispatcher, pl: felt252) { // //pass
+    // let _ = pass_gen(w, pl);
+    // let _ = plain_gen(w, pl);
+    // // let _ = barn_gen(w, pl);
+    }
+}

@@ -1,7 +1,3 @@
-extern crate serde_yaml;
-extern crate serde;
-use serde::{Serialize, Deserialize};
-
-
+use serde::{Deserialize, Serialize};
 
 fn main() {}
