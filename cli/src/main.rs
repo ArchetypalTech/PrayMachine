@@ -1,45 +1,15 @@
-use serde::{Deserialize, Serialize};
+use pray_engine::parse;
+use pray_engine::Config;
 use std::fs;
 use tera::Context;
 use tera::Tera;
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Exit {}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Object {}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Room {
-    room_ID: i64,
-    room_name: String,
-    room_description: String,
-    exits: Option<Vec<Exit>>,
-    objects: Option<Vec<Object>>,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Level {
-    level_name: String,
-    rooms: Vec<Room>,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct Config {
-    levels: Vec<Level>,
-}
 
 fn main() {
     let path = std::env::args().nth(1).expect("path to config file");
     println!("path: {:?}", path);
 
-    let f = std::fs::File::open(path).expect("failed to read config file");
-    let config: Config = serde_yml::from_reader(&f).expect("failed to parse yaml config");
+    let config_string = fs::read_to_string(path).expect("Unable to read config file");
+    let config: Config = parse(&config_string);
 
     let tera = match Tera::new("templates/**/*.tera") {
         Ok(t) => t,
@@ -49,10 +19,12 @@ fn main() {
         }
     };
 
+    fs::create_dir_all("generated").expect("failed to create the 'generated' folder");
+
     let context =
         &Context::from_serialize(&config).expect("Faild to serialise the config into tera context");
     let str = tera
         .render("test.cairo.tera", &context)
         .expect("unable to render template");
-    fs::write("cairo/test.cairo", str).expect("Unable to write file");
+    fs::write("generated/test.cairo", str).expect("Unable to write file");
 }
