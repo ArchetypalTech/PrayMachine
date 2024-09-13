@@ -61,9 +61,21 @@ pub mod spawner {
     }
 
 
+    // GENERATED
+
+
     fn make_rooms(w: IWorldDispatcher, pl: felt252) { // //pass
-    // let _ = pass_gen(w, pl);
-    // let _ = plain_gen(w, pl);
-    // // let _ = barn_gen(w, pl);
+    {% for room in levels[0].rooms %}
+        // {{room.roomName}}
+        let _  = gen_room_{{room.roomID}}(w, pl);
+    {% endfor %}
     }
+
+
+    {% for room in levels[0].rooms %}
+    // {{loop.index}}. {{room.roomName}}: {{room.roomDescription}}
+    fn gen_room_{{room.roomID}}(w: IWorldDispatcher, playerid: felt252) {
+
+    }
+    {% endfor %}
 }
