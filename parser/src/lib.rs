@@ -2,7 +2,18 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Exit {}
+pub struct Exit {
+    #[serde(rename = "exitID")]
+    exit_id: String,
+    direction: String, // TODO Enum
+    is_open: bool,
+    #[serde(rename = "type")]
+    ttype: Option<String>,
+    material: Option<String>,
+
+    change_by_action: Option<String>,
+    change_response: Option<String>,
+}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]

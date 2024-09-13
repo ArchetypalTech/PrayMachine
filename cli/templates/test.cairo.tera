@@ -75,7 +75,21 @@ pub mod spawner {
     {% for room in levels[0].rooms %}
     // {{loop.index}}. {{room.roomName}}: {{room.roomDescription}}
     fn gen_room_{{room.roomID}}(w: IWorldDispatcher, playerid: felt252) {
+        {% if room.exits %}
+        {% for exit in room.exits %}
+        // {{exit.exitID}} dir:{{exit.direction}} type:{{exit.type}} material:{{exit.material}} open:{{exit.isOpen}}
+        let mut action_{{exit.exitID}} = Action{actionId: st::NONE, actionType: zrk::ActionType::Open, 
+            dBitTxt: "the path winds east, it is open", enabled: true, 
+            revertable: false, dBit: true, 
+            affectsActionId: 0, affectedByActionId: 0};
+        action_{{exit.exitID}}.actionId = h_util::action_hash(@action_{{exit.exitID}});
+        {% endfor %}
 
+        store_actions(w, array![{% for exit in room.exits %}action_{{exit.exitID}}{%if loop.last %}{% else %},{% endif %}{% endfor %} ]);
+        
+        {% endif %}
+    
+        
     }
     {% endfor %}
 }
