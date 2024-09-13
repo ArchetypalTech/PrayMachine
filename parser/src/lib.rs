@@ -36,8 +36,8 @@ pub fn parse(str: &String) -> Config {
     serde_yml::from_str(str).expect("failed to parse yaml config")
 }
 
-pub fn serialize(_config: &Config) -> String {
-    String::new()
+pub fn serialize(config: &Config) -> String {
+    serde_yml::to_string(config).expect("failed to serialized")
 }
 
 #[cfg(test)]
