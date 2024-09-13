@@ -69,7 +69,6 @@ pub mod spawner {
     {% endfor %}
     }
 
-
     {% for room in levels[0].rooms %}
     // {{loop.index}}. {{room.roomName}}: {{room.roomDescription}}
     fn gen_room_{{room.roomID}}(w: IWorldDispatcher, playerid: felt252) {
@@ -110,8 +109,72 @@ pub mod spawner {
         store_objects(w, array![{% for exit in room.exits %}path_{{exit.exitID}}{%if loop.last %}{% else %},{% endif %}{% endfor %} ]);
         {% endif %}
 
-      
-       
+
+        {% if room.objects %}
+        {% for object in room.objects %}
+        // object {{object.objID}}
+        
+        {% if object.actions %}
+        {% for action in object.actions %}
+
+        // action {{action.actionID}}
+        let mut action_{{action.actionID}}_{{object.objID}} = Action{actionId: st::NONE, actionType: zrk::ActionType::Kick, 
+            dBitTxt: "the ball bounces feebly and rolls into some dog shit. fun.", enabled: true, 
+            revertable: false, dBit: true, 
+            affectsActionId: 0, affectedByActionId: 0};
+        
+        let action_id_{{action.actionID}}_{{object.objID}} = h_util::action_hash(@action_{{action.actionID}}_{{object.objID}} );
+        action_{{action.actionID}}_{{object.objID}}.actionId = action_id;
+
+        
+        {% endfor %}
+        store_actions(w, array![{% for action in object.actions %}action_{{action.actionID}}_{{object.objID}}{% endfor %} ]);
+        {% endif %}
+        
+
+        let mut object_{{object.objID}} = Object{
+            objectId: st::SETME, 
+            objType: zrk::ObjectType::Ball, // TODO
+            dirType: zrk::DirectionType::None,  // TODO
+            destId: st::NONE,  // TODO
+            matType: zrk::MaterialType::Leather,  // TODO
+            objectActionIds: array![{% for action in object.actions %}action_id_{{action.actionID}}_{{object.objID}}{% endfor %}],
+            txtDefId: st::SETME 
+         };
+
+        let object_id = h_util::obj_hash(@object_{{object.objID}}); 
+        object_{{object.objID}}.objectId = object_id;
+        let ball_desc: ByteArray = "a knock off UEFA football\nits a bit battered and bruised\nnot exactly a sphere\nbut you can kick it";  // TODO
+        let td_id_b = h_util::str_hash(@ball_desc); // text id
+        object_{{object.objID}}.txtDefId = td_id_b;
+
+        store_txt(w, td_id_b, ball_id, ball_desc);
+        
+        {% endfor %}
+        store_objects(w, array![{% for object in room.objects %}object_{{object.objID}}{% endfor %}]);
+        {% endif %}
+        
+        
+        // now store a room with all its shizzle
+        let room_desc: ByteArray = make_txt(rm::PLAIN); // TODO
+        let _txt_id = h_util::str_hash(@room_desc);
+        let place_name: ByteArray = "bensons plain";  // TODO
+        let rmid = h_util::str_hash(@place_name);
+
+        let mut place = Room{
+            roomId: rmid,
+            roomType: zrk::RoomType::Plain, // TODO
+            txtDefId: _txt_id,
+            shortTxt: place_name,
+            objectIds: array![ball_id],
+            dirObjIds: array![de_id, dn_id],
+            players: array![]
+        };
+
+        // set main description text in world store
+        // for the place/area/room
+        store_txt(w, _txt_id, rmid, room_desc);
+        store_places(w, array![place]);
         
     }
     {% endfor %}

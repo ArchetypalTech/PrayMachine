@@ -28,10 +28,12 @@ pub struct Action {
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Object {
+    #[serde(rename = "objID")]
+    obj_id: i64,
     #[serde(rename = "type")]
     ttype: String, // TODO enum ?
     obj_description: String,
-    actions: Vec<Action>,
+    actions: Option<Vec<Action>>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
