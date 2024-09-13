@@ -83,12 +83,36 @@ pub mod spawner {
             revertable: false, dBit: true, 
             affectsActionId: 0, affectedByActionId: 0};
         action_{{exit.exitID}}.actionId = h_util::action_hash(@action_{{exit.exitID}});
+
+        
+        let path_desc: ByteArray = "a path east leads upwards toward the mountains"; // TODO
+        let td_id_p = h_util::str_hash(@path_desc); // text id
+        let east_dest_name: ByteArray = "walking eagle pass"; // TODO
+        let mut path_{{exit.exitID}} = Object{
+            objectId: st::SETME, 
+            objType: zrk::ObjectType::Path, 
+            dirType: zrk::DirectionType::East, // TODO
+            destId: h_util::str_hash(@east_dest_name), 
+            matType: zrk::MaterialType::Dirt,
+            objectActionIds: array![ae_id],
+            txtDefId: td_id_p 
+         };
+
+        let de_id = h_util::obj_hash(@path_{{exit.exitID}}); 
+        path_{{exit.exitID}}.objectId = de_id;
+        store_txt(w, td_id_p, de_id, path_desc);
+
         {% endfor %}
 
         store_actions(w, array![{% for exit in room.exits %}action_{{exit.exitID}}{%if loop.last %}{% else %},{% endif %}{% endfor %} ]);
         
+        // now we have assembled the path objects and stored
+        // their components we can store the paths themselves
+        store_objects(w, array![{% for exit in room.exits %}path_{{exit.exitID}}{%if loop.last %}{% else %},{% endif %}{% endfor %} ]);
         {% endif %}
-    
+
+      
+       
         
     }
     {% endfor %}

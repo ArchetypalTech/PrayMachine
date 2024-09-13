@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct Exit {
     #[serde(rename = "exitID")]
-    exit_id: String,
+    exit_id: i64,
     direction: String, // TODO Enum
     is_open: bool,
     #[serde(rename = "type")]
@@ -17,7 +17,22 @@ pub struct Exit {
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Object {}
+pub struct Action {
+    #[serde(rename = "actionID")]
+    action_id: i64,
+    #[serde(rename = "type")]
+    ttype: String, // TODO enum?
+    default_response: String,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct Object {
+    #[serde(rename = "type")]
+    ttype: String, // TODO enum ?
+    obj_description: String,
+    actions: Vec<Action>,
+}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
