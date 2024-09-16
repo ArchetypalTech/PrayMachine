@@ -2,82 +2,68 @@ levels:
   - levelName: "a wake up call"
     rooms:
       - roomID: 1
-        roomName: "wake up pass"
-        roomDescription: "a high mountain pass winding through the gtaefk hills. The pass is narrow and flanked by steep sided valleys falling off to the east and the west"
+        roomName: "bensons plain"
+        roomDescription: "the plain reaches seemingly endlessly to the sky in all directions\nand the sky itself feels greasy and cold.\npyramidal rough shapes dot the horizin and land which\nupon closer examination are made from bufalo skulls.\nThe air tastes of grease and bensons.\nhappy happy happy\n"
         roomType: "plain"
         exits:
           - exitID: 1
-            direction: "W"
+            direction: "E"
             type: "path"
             material: "dirt"
             isOpen: true
             enabled: true
-            revertable: true
-            destination: "bensons plain"
+            revertable: false
+            destination: "walking eagle pass"
             dBitText: "the path winds east, it is open"
             description: "a path east leads upwards toward the mountains"
-        objects:
-          - objID: 1
-            type: ball
-            objDescription: "a cheap shoplifted uefa football. not quite round, kickable"
-            material: "leather"
-            actions:
-              - actionID: 1
-                type: "kick"
-                defaultResponse: "the balls rolls feebly away as you fluff the kick and lands in some dog shit"
-                enabled: true
-                revertable: false
-                dBitText: "TODO"
-                dBit: false
-      - roomID: 2 # not used for now
-        roomName: "bensons plain"
-        roomDescription: "a barren plain. The air is greasy with the taste of bensons"
-        roomType: "plain"
-        exits:
-          - exitID: 1
-            direction: "W"
-            type: "path"
-            material: "dirt"
-            isOpen: true
-            enabled: true
-            revertable: true
-            destination: "bensons plain"
-            dBitText: "the path winds west, it is open"
-            description: "a path west leads upwards toward the mountains"
           - exitID: 2
             direction: "N"
             type: "path"
             material: "dirt"
             isOpen: true
             enabled: true
-            revertable: true
-            destination: "bensons plain"
-            dBitText: "the path winds north, it is open"
-            description: "a path north leads upwards toward the mountains"
-      - roomID: 3
+            revertable: false
+            destination: "eli's barn"
+            dBitText: "the path heads north, it leads to a barn"
+            description: "a path north leads toward a large wooden barn"
+        objects:
+          - objID: 1
+            type: ball
+            objDescription: "a knock off UEFA football\nits a bit battered and bruised\nnot exactly a sphere\nbut you can kick it"
+            material: "leather"
+            actions:
+              - actionID: 1
+                type: "kick"
+                enabled: true
+                revertable: false
+                dBitText: "the ball bounces feebly and rolls into some dog shit. fun."
+                dBit: true
+      - roomID: 2
         roomName: "eli's barn"
-        roomDescription: "a deserted barn, covered in cobwebs and litetred with broken glass and old hay, it does not smell of hay, you would prefer it dd not smell at all"
-        roomType: "plain"
+        roomDescription: "the barn is old and smells of old hay and oddly dissolution\nthe floor is dirt and trampled dried horse shit scattered with straw and broken bottles\nthe smell is not unpleasent and reminds you faintly of petrol and old socks"
+        roomType: "barn"
         exits:
           - exitID: 1
-            direction: "E"
+            direction: "W"
             type: "window"
             material: "glass"
             isOpen: false
-            enabled: true
-            revertable: true
-            destination: "bensons plain"
-            dBitText: "the path winds west, it is open"
-            description: "a path west leads upwards toward the mountains"
+            enabled: false
+            revertable: false
+            destination: "eli's forge"
+            dBitText: "the window, now broken, falls open"
+            description: "a dusty window, at chest height"
             changeByAction: "break" # TODO
-            changeResponse: "the window shatters into a thousand pieces" # TODO
+            changeResponse: "" # TODO
           - exitID: 2
             direction: "S"
-            type: "path"
-            material: "dirt"
+            type: "door"
+            material: "wood"
             isOpen: true
             enabled: true
-            revertable: true
+            revertable: false
             destination: "bensons plain"
-            dBitText: "the path winds south, it is open"
-            description: "a path south leads upwards toward the mountains"
+            dBitText: "the door, closes with a creak"
+            description: "an old wooden barn door, leads south"
+        objects:
+          - d

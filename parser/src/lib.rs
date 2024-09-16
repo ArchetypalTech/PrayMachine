@@ -32,7 +32,6 @@ pub struct Action {
     revertable: bool,
     d_bit_text: String,
     d_bit: bool, // equivalent to isOpen
-    default_response: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
