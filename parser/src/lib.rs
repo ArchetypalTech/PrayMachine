@@ -8,8 +8,14 @@ pub struct Exit {
     direction: String, // TODO Enum
     is_open: bool,
     #[serde(rename = "type")]
-    ttype: Option<String>,
-    material: Option<String>,
+    ttype: String, // TODO Enum
+    material: String, // TODO Enum
+
+    enabled: bool,
+    revertable: bool,
+    d_bit_text: String,
+    destination: String,
+    description: String,
 
     change_by_action: Option<String>,
     change_response: Option<String>,

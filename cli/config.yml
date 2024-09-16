@@ -10,6 +10,11 @@ levels:
             type: "path"
             material: "dirt"
             isOpen: true
+            enabled: true
+            revertable: true
+            destination: "bensons plain"
+            dBitText: "the path winds east, it is open"
+            description: "a path east leads upwards toward the mountains"
         objects:
           - objID: 1
             type: Football
@@ -18,16 +23,30 @@ levels:
               - actionID: 1
                 type: "kick"
                 defaultResponse: "the balls rolls feebly away as you fluff the kick and lands in some dog shit"
-      - roomID: 2
+      - roomID: 2 # not used for now
         roomName: "bensons plain"
         roomDescription: "a barren plain. The air is greasy with the taste of bensons"
         exits:
           - exitID: 1
             direction: "W"
+            type: "path"
+            material: "dirt"
             isOpen: true
+            enabled: true
+            revertable: true
+            destination: "bensons plain"
+            dBitText: "the path winds west, it is open"
+            description: "a path west leads upwards toward the mountains"
           - exitID: 2
             direction: "N"
+            type: "path"
+            material: "dirt"
             isOpen: true
+            enabled: true
+            revertable: true
+            destination: "bensons plain"
+            dBitText: "the path winds north, it is open"
+            description: "a path north leads upwards toward the mountains"
       - roomID: 3
         roomName: "eli's barn"
         roomDescription: "a deserted barn, covered in cobwebs and litetred with broken glass and old hay, it does not smell of hay, you would prefer it dd not smell at all"
@@ -37,8 +56,20 @@ levels:
             type: "window"
             material: "glass"
             isOpen: false
-            changeByAction: "break"
-            changeResponse: "the window shatters into a thousand pieces"
+            enabled: true
+            revertable: true
+            destination: "bensons plain"
+            dBitText: "the path winds west, it is open"
+            description: "a path west leads upwards toward the mountains"
+            changeByAction: "break" # TODO
+            changeResponse: "the window shatters into a thousand pieces" # TODO
           - exitID: 2
             direction: "S"
+            type: "path"
+            material: "dirt"
             isOpen: true
+            enabled: true
+            revertable: true
+            destination: "bensons plain"
+            dBitText: "the path winds south, it is open"
+            description: "a path south leads upwards toward the mountains"

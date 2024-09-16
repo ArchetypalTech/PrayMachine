@@ -1,3 +1,35 @@
+{% macro direction(dir) %}
+  {% if dir == "E" %}
+  zrk::DirectionType::East
+  {% elif dir == "S" %}
+  zrk::DirectionType::South
+  {% elif dir == "W" %}
+  zrk::DirectionType::West
+  {% elif dir == "N" %}
+  zrk::DirectionType::North
+  {% else %}UNKNOWN DIRECTION
+  {% endif %}
+{% endmacro direction %}
+
+{% macro objectType(t) %}
+  {% if t == "path" %}
+  zrk::ObjectType::Path
+  {% elif t == "window" %}
+  zrk::ObjectType::Window
+  {% elif t == "ball" %}
+  zrk::ObjectType::Ball
+  {% else %}UNKNOWN OBJECT TYPE{% endif %}
+{% endmacro objectType %}
+
+{% macro materialType(m) %}
+  {% if m == "dirt" %}
+  zrk::MaterialType::Dirt
+  {% elif m == "glass" %}
+  zrk::MaterialType::Dirt
+  {% else %}UNKNOWN MATERIAL TYPE{% endif %}
+{% endmacro materialType %}
+
+
 #[dojo::interface]
 trait ISpawner<T> {
     fn setup(ref world: IWorldDispatcher);
@@ -74,24 +106,27 @@ pub mod spawner {
     fn gen_room_{{room.roomID}}(w: IWorldDispatcher, playerid: felt252) {
         {% if room.exits %}
         {% for exit in room.exits %}
-        // {{exit.exitID}} dir:{{exit.direction}} type:{{exit.type}} material:{{exit.material}} open:{{exit.isOpen}}
+        // {{exit.exitID}}
+        // dir:{{exit.direction}} type:{{exit.type}} material:{{exit.material}} open:{{exit.isOpen}}
         let mut action_{{exit.exitID}} = Action{actionId: st::NONE, actionType: zrk::ActionType::Open, 
-            dBitTxt: "the path winds east, it is open", enabled: true, 
-            revertable: false, dBit: true, 
-            affectsActionId: 0, affectedByActionId: 0};
+            dBitTxt: "{{exit.dBitText}}", enabled: {{exit.enabled}}, 
+            revertable: {{exit.revertable}}, dBit: {{exit.isOpen}}, 
+            affectsActionId: 0, // TODO ?
+            affectedByActionId: 0 // TODO ?
+        }; 
         let action_id = h_util::action_hash(@action_{{exit.exitID}});
         action_{{exit.exitID}}.actionId = action_id;
 
         
-        let path_desc: ByteArray = "a path east leads upwards toward the mountains"; // TODO
+        let path_desc: ByteArray = "{{exit.description}}";
         let td_id_p = h_util::str_hash(@path_desc); // text id
-        let dest_name: ByteArray = "walking eagle pass"; // TODO
+        let dest_name: ByteArray = "{{exit.destination}}";
         let mut path_{{exit.exitID}} = Object{
             objectId: st::SETME, 
-            objType: zrk::ObjectType::Path, 
-            dirType: zrk::DirectionType::East, // TODO
+            objType: {{ self::objectType(t=exit.type)}} 
+            dirType: {{ self::direction(dir=exit.direction) }},
             destId: h_util::str_hash(@dest_name), 
-            matType: zrk::MaterialType::Dirt,
+            matType: {{ self::materialType(m=exit.material) }},
             objectActionIds: array![action_id],
             txtDefId: td_id_p 
          };
