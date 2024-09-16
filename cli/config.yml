@@ -4,6 +4,7 @@ levels:
       - roomID: 1
         roomName: "wake up pass"
         roomDescription: "a high mountain pass winding through the gtaefk hills. The pass is narrow and flanked by steep sided valleys falling off to the east and the west"
+        roomType: "plain"
         exits:
           - exitID: 1
             direction: "W"
@@ -17,15 +18,21 @@ levels:
             description: "a path east leads upwards toward the mountains"
         objects:
           - objID: 1
-            type: Football
+            type: ball
             objDescription: "a cheap shoplifted uefa football. not quite round, kickable"
+            material: "leather"
             actions:
               - actionID: 1
                 type: "kick"
                 defaultResponse: "the balls rolls feebly away as you fluff the kick and lands in some dog shit"
+                enabled: true
+                revertable: false
+                dBitText: "TODO"
+                dBit: false
       - roomID: 2 # not used for now
         roomName: "bensons plain"
         roomDescription: "a barren plain. The air is greasy with the taste of bensons"
+        roomType: "plain"
         exits:
           - exitID: 1
             direction: "W"
@@ -50,6 +57,7 @@ levels:
       - roomID: 3
         roomName: "eli's barn"
         roomDescription: "a deserted barn, covered in cobwebs and litetred with broken glass and old hay, it does not smell of hay, you would prefer it dd not smell at all"
+        roomType: "plain"
         exits:
           - exitID: 1
             direction: "E"

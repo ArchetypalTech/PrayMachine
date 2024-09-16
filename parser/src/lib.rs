@@ -28,6 +28,10 @@ pub struct Action {
     action_id: i64,
     #[serde(rename = "type")]
     ttype: String, // TODO enum?
+    enabled: bool,
+    revertable: bool,
+    d_bit_text: String,
+    d_bit: bool, // equivalent to isOpen
     default_response: String,
 }
 
@@ -38,6 +42,7 @@ pub struct Object {
     obj_id: i64,
     #[serde(rename = "type")]
     ttype: String, // TODO enum ?
+    material: String, // TODO Enum
     obj_description: String,
     actions: Option<Vec<Action>>,
 }
@@ -49,6 +54,7 @@ pub struct Room {
     room_id: i64,
     room_name: String,
     room_description: String,
+    room_type: String,
     exits: Option<Vec<Exit>>,
     objects: Option<Vec<Object>>,
 }
