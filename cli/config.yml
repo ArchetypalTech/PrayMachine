@@ -5,29 +5,34 @@ levels:
         roomName: "bensons plain"
         roomDescription: "the plain reaches seemingly endlessly to the sky in all directions\nand the sky itself feels greasy and cold.\npyramidal rough shapes dot the horizin and land which\nupon closer examination are made from bufalo skulls.\nThe air tastes of grease and bensons.\nhappy happy happy\n"
         roomType: "plain"
-        exits:
-          - exitID: 1
-            direction: "E"
-            type: "path"
-            material: "dirt"
-            isOpen: true
-            enabled: true
-            revertable: false
-            destination: "walking eagle pass"
-            dBitText: "the path winds east, it is open"
-            description: "a path east leads upwards toward the mountains"
-          - exitID: 2
-            direction: "N"
-            type: "path"
-            material: "dirt"
-            isOpen: true
-            enabled: true
-            revertable: false
-            destination: "eli's barn"
-            dBitText: "the path heads north, it leads to a barn"
-            description: "a path north leads toward a large wooden barn"
         objects:
           - objID: 1
+            type: "path"
+            direction: "E"
+            destination: "walking eagle pass"
+            material: "dirt"
+            objDescription: "a path east leads upwards toward the mountains"
+            actions:
+              - actionID: 1
+                type: "open"
+                enabled: true
+                revertable: false
+                dBit: true
+                dBitText: "the path winds east, it is open"
+          - objID: 2
+            type: "path"
+            direction: "N"
+            destination: "eli's barn"
+            material: "dirt"
+            objDescription: "a path north leads toward a large wooden barn"
+            actions:
+              - actionID: 1
+                type: "open"
+                enabled: true
+                revertable: false
+                dBit: true
+                dBitText: "the path heads north, it leads to a barn"
+          - objID: 3
             type: ball
             objDescription: "a knock off UEFA football\nits a bit battered and bruised\nnot exactly a sphere\nbut you can kick it"
             material: "leather"
@@ -42,49 +47,56 @@ levels:
         roomName: "eli's barn"
         roomDescription: "the barn is old and smells of old hay and oddly dissolution\nthe floor is dirt and trampled dried horse shit scattered with straw and broken bottles\nthe smell is not unpleasent and reminds you faintly of petrol and old socks"
         roomType: "barn"
-        exits:
-          - exitID: 1
-            direction: "W"
+        objects:
+          - objID: 1
             type: "window"
-            material: "glass"
-            isOpen: false
-            enabled: false
-            revertable: false
+            direction: "W"
             destination: "eli's forge"
-            dBitText: "the window, now broken, falls open"
-            description: "a dusty window, at chest height"
-            changeByAction: "break" # TODO
-            changeResponse: "" # TODO
+            material: "glass"
+            objDescription: "a dusty window, at chest height"
             actions:
               - actionID: 1
+                type: "open"
+                dBit: false
+                enabled: false
+                revertable: false
+                dBitText: "the window, now broken, falls open"
+              - actionID: 2
                 type: "break"
                 dBitText: "the window, smashes, glass flies everywhere, very very satisfying"
                 enabled: true
                 dBit: false
                 revertable: false
-                affectsActionId: open # TODO how to we identify object
-          - exitID: 2
-            direction: "S"
+                affectsAction:
+                  actionID: 1
+          - objID: 2
             type: "door"
-            material: "wood"
-            isOpen: true
-            enabled: true
-            revertable: false
+            direction: "S"
             destination: "bensons plain"
-            dBitText: "the door, closes with a creak"
-            description: "an old wooden barn door, leads south"
+            material: "wood"
+            objDescription: "an old wooden barn door, leads south"
+            actions:
+              - actionID: 1
+                type: "open"
+                enabled: true
+                revertable: false
+                dBit: true
+                dBitText: "the door, closes with a creak"
       - roomID: 3
         roomName: "walking eagle pass"
         roomDescription: "it winds through the mountains, the path is treacherous\ntoilet papered trees cover the steep \nvalley sides below you.\nOn closer inspection the TP might \nbe the remains of a cricket team\nor perhaps a lost and very dead KKK picnic group.\nIt's brass monkeys."
         roomType: "mountains"
-        exits:
-          - exitID: 1
-            direction: "W"
+        objects:
+          - objID: 1
             type: "path"
-            material: "dirt"
-            isOpen: true
-            enabled: true
-            revertable: false
+            direction: "W"
             destination: "bensons plain"
-            dBitText: "the path winds west, it is open"
-            description: "path"
+            material: "dirt"
+            objDescription: "path"
+            actions:
+              - actionID: 1
+                type: "open"
+                enabled: true
+                revertable: false
+                dBit: true
+                dBitText: "the path winds west, it is open"

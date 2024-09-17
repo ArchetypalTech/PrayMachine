@@ -14,7 +14,7 @@ pub fn linebreaks(value: &Value, params: &HashMap<String, Value>) -> tera::Resul
     } else {
         return Err("The linebreaks filter can only be applied to strings".into());
     };
-    let mut replacement_text: String = String::from_str("").expect("failed to convert");
+    let mut replacement_text: String = String::from_str("\\n").expect("failed to convert");
     let default_value = Value::String(replacement_text);
     let replacement = params.get("to");
     let replacement_value = if let Option::Some(v) = replacement {

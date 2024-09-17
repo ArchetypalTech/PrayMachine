@@ -2,23 +2,13 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct Exit {
-    #[serde(rename = "exitID")]
-    exit_id: i64,
-    direction: String, // TODO Enum
-    is_open: bool,
-    #[serde(rename = "type")]
-    ttype: String, // TODO Enum
-    material: String, // TODO Enum
-
-    enabled: bool,
-    revertable: bool,
-    d_bit_text: String,
-    destination: String,
-    description: String,
-
-    change_by_action: Option<String>,
-    change_response: Option<String>,
+pub struct Effect {
+    #[serde(rename = "roomID")]
+    room_id: Option<i64>,
+    #[serde(rename = "objectID")]
+    object_id: Option<i64>,
+    #[serde(rename = "actionID")]
+    action_id: i64,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -31,7 +21,8 @@ pub struct Action {
     enabled: bool,
     revertable: bool,
     d_bit_text: String,
-    d_bit: bool, // equivalent to isOpen
+    d_bit: bool,
+    affects_action: Option<Effect>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -43,6 +34,8 @@ pub struct Object {
     ttype: String, // TODO enum ?
     material: String, // TODO Enum
     obj_description: String,
+    direction: Option<String>, // TODO Enum
+    destination: Option<String>,
     actions: Option<Vec<Action>>,
 }
 
@@ -54,7 +47,6 @@ pub struct Room {
     room_name: String,
     room_description: String,
     room_type: String,
-    exits: Option<Vec<Exit>>,
     objects: Option<Vec<Object>>,
 }
 
