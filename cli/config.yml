@@ -55,6 +55,14 @@ levels:
             description: "a dusty window, at chest height"
             changeByAction: "break" # TODO
             changeResponse: "" # TODO
+            actions:
+              - actionID: 1
+                type: "break"
+                dBitText: "the window, smashes, glass flies everywhere, very very satisfying"
+                enabled: true
+                dBit: false
+                revertable: false
+                affectsActionId: open # TODO how to we identify object
           - exitID: 2
             direction: "S"
             type: "door"
@@ -65,5 +73,18 @@ levels:
             destination: "bensons plain"
             dBitText: "the door, closes with a creak"
             description: "an old wooden barn door, leads south"
-        objects:
-          - d
+      - roomID: 3
+        roomName: "walking eagle pass"
+        roomDescription: "it winds through the mountains, the path is treacherous\ntoilet papered trees cover the steep \nvalley sides below you.\nOn closer inspection the TP might \nbe the remains of a cricket team\nor perhaps a lost and very dead KKK picnic group.\nIt's brass monkeys."
+        roomType: "mountains"
+        exits:
+          - exitID: 1
+            direction: "W"
+            type: "path"
+            material: "dirt"
+            isOpen: true
+            enabled: true
+            revertable: false
+            destination: "bensons plain"
+            dBitText: "the path winds west, it is open"
+            description: "path"
