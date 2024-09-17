@@ -151,7 +151,7 @@ pub mod spawner {
         action_{{object.objID}}_{{action.actionID}}.actionId = action_id_{{object.objID}}_{{action.actionID}};
         
         {% endfor -%}
-        store_actions(w, array![{%- for action in object.actions -%}action_{{object.objID}}_{{action.actionID}},{%- endfor -%} ]);
+        
         {% endif -%}
         
 
@@ -185,8 +185,24 @@ pub mod spawner {
         object_{{object.objID}}.txtDefId = td_id_b;
 
         store_txt(w, td_id_b, object_id_{{object.objID}}, object_desc);
+
         
         {% endfor -%}
+
+        {%- for object in room.objects -%}
+        {%- if object.actions -%}
+        {%- for action in object.actions -%}
+        {%- if action.affectsAction -%}
+        action_{{object.objID}}_{{action.actionID}}.affectsActionId = action_id_{{object.objID}}_{{ action.affectsAction.actionID }};
+        action_{{object.objID}}_{{ action.affectsAction.actionID }}.affectedByActionId = action_id_{{object.objID}}_{{ action.actionID }};
+        {%- endif -%}
+        {% endfor -%}
+        {%- endif -%}
+        store_actions(w, array![{%- for action in object.actions -%}action_{{object.objID}}_{{action.actionID}},{%- endfor -%} ]);
+        {% endfor %}
+
+        
+
         store_objects(w, array![{%- for object in room.objects -%}object_{{object.objID}},{%- endfor -%}]);
         {%- endif %}
         
