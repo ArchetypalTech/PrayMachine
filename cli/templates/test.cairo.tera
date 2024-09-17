@@ -21,6 +21,8 @@
   zrk::ObjectType::Window
   {%- elif t == "ball" -%}
   zrk::ObjectType::Ball
+  {%- elif t == "door" -%}
+  zrk::ObjectType::Door
   {%- else -%}UNKNOWN OBJECT TYPE{%- endif -%}
 {%- endmacro objectType -%}
 {%- macro actionType(t) -%}
@@ -28,19 +30,29 @@
   zrk::ActionType::Open
   {%- elif t == "kick" -%}
   zrk::ActionType::Kick
+  {%- elif t == "break" -%}
+  zrk::ActionType::Break
   {%- else -%}UNKNOWN ACTION TYPE{%- endif -%}
 {%- endmacro actionType -%}
 {%- macro materialType(m) -%}
   {%- if m == "dirt" -%}
   zrk::MaterialType::Dirt
   {%- elif m == "glass" -%}
-  zrk::MaterialType::Dirt
+  zrk::MaterialType::Glass
+  {%- elif m == "leather" -%}
+  zrk::MaterialType::Leather
+  {%- elif m == "wood" -%}
+  zrk::MaterialType::Wood
   {%- else -%}UNKNOWN MATERIAL TYPE{%- endif -%}
 {%- endmacro materialType -%}
 {%- macro roomType(r) -%}
   {%- if r == "plain" -%}
   zrk::RoomType::Plain
-  {%- else -%}UNKNOWN MATERIAL TYPE{%- endif -%}
+  {%- elif r == "mountains" -%}
+  zrk::RoomType::Mountains
+  {%- elif r == "barn" -%}
+  zrk::RoomType::Barn
+  {%- else -%}UNKNOWN ROOM TYPE{%- endif -%}
 {%- endmacro roomType -%}
 
 #[dojo::interface]
@@ -126,43 +138,57 @@ pub mod spawner {
         {%- for action in object.actions -%}
 
         // action {{action.actionID}}
-        let mut action_{{action.actionID}}_{{object.objID}} = Action{actionId: st::NONE, {{ self::actionType(t=action.type) | trim }}, , 
+        let mut action_{{action.actionID}}_{{object.objID}} = Action{
+            actionId: st::NONE, 
+            actionType: {{ self::actionType(t=action.type) | trim }},  
             dBitTxt: "{{action.dBitText}}", enabled: {{action.enabled}}, 
             revertable: {{action.revertable}}, dBit: {{action.dBit}}, 
-            affectsActionId: 0, // TODO ?
-            affectedByActionId: 0 // TODO ?
+            affectsActionId: 0, // TODO 
+            affectedByActionId: 0 // TODO : remove ?
         };
         
         let action_id_{{action.actionID}}_{{object.objID}} = h_util::action_hash(@action_{{action.actionID}}_{{object.objID}} );
-        action_{{action.actionID}}_{{object.objID}}.actionId = action_id;
+        action_{{action.actionID}}_{{object.objID}}.actionId = action_id_{{action.actionID}}_{{object.objID}};
         
-        {%- endfor -%}
-        store_actions(w, array![{%- for action in object.actions -%}action_{{action.actionID}}_{{object.objID}}{%- endfor -%} ]);
-        {%- endif -%}
+        {% endfor -%}
+        store_actions(w, array![{%- for action in object.actions -%}action_{{action.actionID}}_{{object.objID}},{%- endfor -%} ]);
+        {% endif -%}
         
 
+        {%if object.destination -%}
         let mut object_{{object.objID}} = Object{
             objectId: st::SETME, 
             objType: {{ self::objectType(t=object.type) | trim }},
             matType: {{ self::materialType(m=object.material) | trim }},
             dirType: {{ self::direction(dir=object.direction) | trim }},
-            destId: {%- if object.destination -%} h_util::str_hash("{{object.destination}}"){%- else -%}st:NONE{%- endif -%},
-            objectActionIds: array![{%- for action in object.actions -%}action_id_{{action.actionID}}_{{object.objID}}{%- endfor -%}],
+            destId: st::NONE,
+            objectActionIds: array![{%- for action in object.actions -%}action_id_{{action.actionID}}_{{object.objID}},{%- endfor -%}],
             txtDefId: st::SETME 
-         };
+        };
+        {%- else -%}
+        let destination = "{{object.destination}}";
+        let mut object_{{object.objID}} = Object{
+            objectId: st::SETME, 
+            objType: {{ self::objectType(t=object.type) | trim }},
+            matType: {{ self::materialType(m=object.material) | trim }},
+            dirType: {{ self::direction(dir=object.direction) | trim }},
+            destId: h_util::str_hash(@destination),
+            objectActionIds: array![{%- for action in object.actions -%}action_id_{{action.actionID}}_{{object.objID}},{%- endfor -%}],
+            txtDefId: st::SETME 
+        };
+        {%- endif %}
 
-        let object_id = h_util::obj_hash(@object_{{object.objID}}); 
-        object_{{object.objID}}.objectId = object_id;
+        let object_id_{{object.objID}} = h_util::obj_hash(@object_{{object.objID}}); 
+        object_{{object.objID}}.objectId = object_id_{{object.objID}};
         let object_desc: ByteArray = "{{ object.objDescription | linebreaks }}";
         let td_id_b = h_util::str_hash(@object_desc);
         object_{{object.objID}}.txtDefId = td_id_b;
 
-        store_txt(w, td_id_b, ball_id, ball_desc);
+        store_txt(w, td_id_b, object_id_{{object.objID}}, object_desc);
         
-        {%- endfor -%}
-        store_objects(w, array![{%- for object in room.objects -%}object_{{object.objID}}{%- endfor -%}]);
-        {%- endif -%}
-        
+        {% endfor -%}
+        store_objects(w, array![{%- for object in room.objects -%}object_{{object.objID}},{%- endfor -%}]);
+        {%- endif %}
         
         // now store a room with all its shizzle
         let room_desc: ByteArray = "{{ room.roomDescription | linebreaks }}";
@@ -175,8 +201,8 @@ pub mod spawner {
             roomType: {{ self::roomType(r=room.roomType) | trim }},
             txtDefId: _txt_id,
             shortTxt: place_name,
-            objectIds: array![ball_id],
-            dirObjIds: array![de_id, dn_id],
+            objectIds: array![{%- for id in room.objectIds -%}object_id_{{id}},{%- endfor -%}],
+            dirObjIds: array![{%- for id in room.dirObjIds -%}object_id_{{id}},{%- endfor -%}],
             players: array![]
         };
 

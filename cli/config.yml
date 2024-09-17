@@ -43,6 +43,8 @@ levels:
                 revertable: false
                 dBitText: "the ball bounces feebly and rolls into some dog shit. fun."
                 dBit: true
+        objectIds: [3]
+        dirObjIds: [1, 2]
       - roomID: 2
         roomName: "eli's barn"
         roomDescription: "the barn is old and smells of old hay and oddly dissolution\nthe floor is dirt and trampled dried horse shit scattered with straw and broken bottles\nthe smell is not unpleasent and reminds you faintly of petrol and old socks"
@@ -82,6 +84,8 @@ levels:
                 revertable: false
                 dBit: true
                 dBitText: "the door, closes with a creak"
+        objectIds: []
+        dirObjIds: [1, 2]
       - roomID: 3
         roomName: "walking eagle pass"
         roomDescription: "it winds through the mountains, the path is treacherous\ntoilet papered trees cover the steep \nvalley sides below you.\nOn closer inspection the TP might \nbe the remains of a cricket team\nor perhaps a lost and very dead KKK picnic group.\nIt's brass monkeys."
@@ -100,3 +104,5 @@ levels:
                 revertable: false
                 dBit: true
                 dBitText: "the path winds west, it is open"
+        objectIds: []
+        dirObjIds: [1]

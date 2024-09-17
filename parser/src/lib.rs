@@ -48,6 +48,8 @@ pub struct Room {
     room_description: String,
     room_type: String,
     objects: Option<Vec<Object>>,
+    object_ids: Vec<i64>,
+    dir_obj_ids: Vec<i64>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
