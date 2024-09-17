@@ -21,6 +21,15 @@
   {% else %}UNKNOWN OBJECT TYPE{% endif %}
 {% endmacro objectType %}
 
+{% macro actionType(t) %}
+  {% if t == "open" %}
+  zrk::ActionType::Open
+  {% elif t == "kick" %}
+  zrk::ActionType::Kick
+  {% else %}UNKNOWN ACTION TYPE{% endif %}
+{% endmacro actionType %}
+
+
 {% macro materialType(m) %}
   {% if m == "dirt" %}
   zrk::MaterialType::Dirt
@@ -116,7 +125,7 @@ pub mod spawner {
         {% for exit in room.exits %}
         // {{exit.exitID}}
         // dir:{{exit.direction}} type:{{exit.type}} material:{{exit.material}} open:{{exit.isOpen}}
-        let mut action_{{exit.exitID}} = Action{actionId: st::NONE, actionType: zrk::ActionType::Open, 
+        let mut action_{{exit.exitID}} = Action{actionId: st::NONE, actionType: {{ self::actionType(t="open") }}, 
             dBitTxt: "{{exit.dBitText}}", enabled: {{exit.enabled}}, 
             revertable: {{exit.revertable}}, dBit: {{exit.isOpen}}, 
             affectsActionId: 0, // TODO ?
@@ -161,7 +170,7 @@ pub mod spawner {
         {% for action in object.actions %}
 
         // action {{action.actionID}}
-        let mut action_{{action.actionID}}_{{object.objID}} = Action{actionId: st::NONE, actionType: zrk::ActionType::Kick, 
+        let mut action_{{action.actionID}}_{{object.objID}} = Action{actionId: st::NONE, {{ self::actionType(t=action.type) }}, , 
             dBitTxt: "{{action.dBitText}}", enabled: {{action.enabled}}, 
             revertable: {{action.revertable}}, dBit: {{action.dBit}}, 
             affectsActionId: 0, // TODO ?
