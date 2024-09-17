@@ -138,7 +138,7 @@ pub mod spawner {
         {%- for action in object.actions -%}
 
         // action {{action.actionID}}
-        let mut action_{{action.actionID}}_{{object.objID}} = Action{
+        let mut action_{{object.objID}}_{{action.actionID}} = Action{
             actionId: st::NONE, 
             actionType: {{ self::actionType(t=action.type) | trim }},  
             dBitTxt: "{{action.dBitText}}", enabled: {{action.enabled}}, 
@@ -147,11 +147,11 @@ pub mod spawner {
             affectedByActionId: 0 // TODO : remove ?
         };
         
-        let action_id_{{action.actionID}}_{{object.objID}} = h_util::action_hash(@action_{{action.actionID}}_{{object.objID}} );
-        action_{{action.actionID}}_{{object.objID}}.actionId = action_id_{{action.actionID}}_{{object.objID}};
+        let action_id_{{object.objID}}_{{action.actionID}} = h_util::action_hash(@action_{{object.objID}}_{{action.actionID}} );
+        action_{{object.objID}}_{{action.actionID}}.actionId = action_id_{{object.objID}}_{{action.actionID}};
         
         {% endfor -%}
-        store_actions(w, array![{%- for action in object.actions -%}action_{{action.actionID}}_{{object.objID}},{%- endfor -%} ]);
+        store_actions(w, array![{%- for action in object.actions -%}action_{{object.objID}}_{{action.actionID}},{%- endfor -%} ]);
         {% endif -%}
         
 
@@ -162,7 +162,7 @@ pub mod spawner {
             matType: {{ self::materialType(m=object.material) | trim }},
             dirType: {{ self::direction(dir=object.direction) | trim }},
             destId: st::NONE,
-            objectActionIds: array![{%- for action in object.actions -%}action_id_{{action.actionID}}_{{object.objID}},{%- endfor -%}],
+            objectActionIds: array![{%- for action in object.actions -%}action_id_{{object.objID}}_{{action.actionID}},{%- endfor -%}],
             txtDefId: st::SETME 
         };
         {%- else -%}
@@ -173,7 +173,7 @@ pub mod spawner {
             matType: {{ self::materialType(m=object.material) | trim }},
             dirType: {{ self::direction(dir=object.direction) | trim }},
             destId: h_util::str_hash(@destination),
-            objectActionIds: array![{%- for action in object.actions -%}action_id_{{action.actionID}}_{{object.objID}},{%- endfor -%}],
+            objectActionIds: array![{%- for action in object.actions -%}action_id_{{object.objID}}_{{action.actionID}},{%- endfor -%}],
             txtDefId: st::SETME 
         };
         {%- endif %}
