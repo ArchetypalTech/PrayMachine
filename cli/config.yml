@@ -51,6 +51,19 @@ levels:
         roomType: "barn"
         objects:
           - objID: 1
+            type: "door"
+            direction: "S"
+            destination: "bensons plain"
+            material: "wood"
+            objDescription: "an old wooden barn door, leads south"
+            actions:
+              - actionID: 1
+                type: "open"
+                enabled: true
+                revertable: false
+                dBit: true
+                dBitText: "the door, closes with a creak"
+          - objID: 2
             type: "window"
             direction: "W"
             destination: "eli's forge"
@@ -71,19 +84,6 @@ levels:
                 revertable: false
                 affectsAction:
                   actionID: 1
-          - objID: 2
-            type: "door"
-            direction: "S"
-            destination: "bensons plain"
-            material: "wood"
-            objDescription: "an old wooden barn door, leads south"
-            actions:
-              - actionID: 1
-                type: "open"
-                enabled: true
-                revertable: false
-                dBit: true
-                dBitText: "the door, closes with a creak"
         objectIds: []
         dirObjIds: [1, 2]
       - roomID: 3

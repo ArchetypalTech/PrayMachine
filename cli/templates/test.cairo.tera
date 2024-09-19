@@ -85,29 +85,20 @@ pub mod spawner {
     }
 
     fn store_objects(w: IWorldDispatcher, t: Array<Object>) {
-        let mut i = 0;
-        while i < t.len() {
-            let a: Object = t.at(i).clone();
-            set!(w, (a));
-            i += 1 + i;
+        for o in t {
+            set!(w, (o));
         }
     }
 
     fn store_actions(w: IWorldDispatcher, t: Array<Action>) {
-        let mut i = 0;
-        while i < t.len() {
-            let a: Action = t.at(i).clone();
-            set!(w, (a));
-            i += 1 + i;
+        for o in t {
+            set!(w, (o));
         }
     }
 
     fn store_places(w: IWorldDispatcher, t: Array<Room>) {
-        let mut i = 0;
-        while i < t.len() {
-            let a: Room = t.at(i).clone();
-            set!(w, (a));
-            i += 1 + i;
+        for o in t {
+            set!(w, (o));
         }
     }
 
@@ -143,8 +134,8 @@ pub mod spawner {
             actionType: {{ self::actionType(t=action.type) | trim }},  
             dBitTxt: "{{action.dBitText}}", enabled: {{action.enabled}}, 
             revertable: {{action.revertable}}, dBit: {{action.dBit}}, 
-            affectsActionId: 0, // TODO 
-            affectedByActionId: 0 // TODO : remove ?
+            affectsActionId: 0,
+            affectedByActionId: 0
         };
         
         let action_id_{{object.objID}}_{{action.actionID}} = h_util::action_hash(@action_{{object.objID}}_{{action.actionID}} );
@@ -201,9 +192,8 @@ pub mod spawner {
         store_actions(w, array![{%- for action in object.actions -%}action_{{object.objID}}_{{action.actionID}},{%- endfor -%} ]);
         {% endfor %}
 
-        
-
-        store_objects(w, array![{%- for object in room.objects -%}object_{{object.objID}},{%- endfor -%}]);
+        {%- for object in room.objects -%}store_objects(w, array![object_{{object.objID}}]);{%- endfor -%}
+        // store_objects(w, array![{%- for object in room.objects -%}object_{{object.objID}},{%- endfor -%}]);
         {%- endif %}
         
         // now store a room with all its shizzle
