@@ -43,12 +43,15 @@ fn write(config_path: &String, destination_path: &String, tera: &Tera) {
     let config_string = fs::read_to_string(config_path).expect("Unable to read config file");
     let config: Config = parse(&config_string);
 
+    let mut destination_file_path = destination_path.to_owned();
+    destination_file_path.push_str("spawner.cairo"); // TODO
+
     let context =
         &Context::from_serialize(&config).expect("Faild to serialise the config into tera context");
     let str = tera
-        .render("test.cairo.tera", &context)
+        .render("spawner.cairo.tera", &context) // TODO
         .expect("unable to render template");
-    fs::write("generated/test.cairo", str).expect("Unable to write file");
+    fs::write(destination_file_path, str).expect("Unable to write file");
 }
 
 fn main() -> Result<()> {
