@@ -156,16 +156,6 @@ pub mod spawner {
         
 
         {%if object.destination -%}
-        let mut object_{{object.objID}} = Object{
-            objectId: st::SETME, 
-            objType: {{ self::objectType(t=object.type) | trim }},
-            matType: {{ self::materialType(m=object.material) | trim }},
-            dirType: {{ self::direction(dir=object.direction) | trim }},
-            destId: st::NONE,
-            objectActionIds: array![{%- for action in object.actions -%}action_id_{{object.objID}}_{{action.actionID}},{%- endfor -%}],
-            txtDefId: st::SETME 
-        };
-        {%- else -%}
         let destination = "{{object.destination}}";
         let mut object_{{object.objID}} = Object{
             objectId: st::SETME, 
@@ -173,6 +163,16 @@ pub mod spawner {
             matType: {{ self::materialType(m=object.material) | trim }},
             dirType: {{ self::direction(dir=object.direction) | trim }},
             destId: h_util::str_hash(@destination),
+            objectActionIds: array![{%- for action in object.actions -%}action_id_{{object.objID}}_{{action.actionID}},{%- endfor -%}],
+            txtDefId: st::SETME 
+        };
+        {%- else -%}
+        let mut object_{{object.objID}} = Object{
+            objectId: st::SETME, 
+            objType: {{ self::objectType(t=object.type) | trim }},
+            matType: {{ self::materialType(m=object.material) | trim }},
+            dirType: {{ self::direction(dir=object.direction) | trim }},
+            destId: st::NONE,
             objectActionIds: array![{%- for action in object.actions -%}action_id_{{object.objID}}_{{action.actionID}},{%- endfor -%}],
             txtDefId: st::SETME 
         };
