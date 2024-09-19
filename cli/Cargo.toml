@@ -6,8 +6,7 @@ edition = "2021"
 [dependencies]
 pray_engine = { path = "../parser" }
 tera = "1"
-serde = "1.0"
-serde_yml = "0.0.12"
+notify = "6.1.1"
 
 [[bin]]
 name = 'pray'

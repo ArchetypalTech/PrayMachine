@@ -1,7 +1,10 @@
+use notify::{RecursiveMode, Result, Watcher};
 use pray_engine::parse;
 use pray_engine::Config;
 use std::collections::HashMap;
 use std::fs;
+use std::io;
+use std::path::Path;
 use std::str::FromStr;
 use tera::Context;
 use tera::Tera;
@@ -34,7 +37,21 @@ pub fn linebreaks(value: &Value, params: &HashMap<String, Value>) -> tera::Resul
     ))
 }
 
-fn main() {
+fn write(config_path: &String, destination_path: &String, tera: &Tera) {
+    fs::create_dir_all(destination_path).expect("failed to create the destination folder");
+
+    let config_string = fs::read_to_string(config_path).expect("Unable to read config file");
+    let config: Config = parse(&config_string);
+
+    let context =
+        &Context::from_serialize(&config).expect("Faild to serialise the config into tera context");
+    let str = tera
+        .render("test.cairo.tera", &context)
+        .expect("unable to render template");
+    fs::write("generated/test.cairo", str).expect("Unable to write file");
+}
+
+fn main() -> Result<()> {
     let config_path = std::env::args().nth(1).expect("path to config file");
     println!("path: {:?}", config_path);
 
@@ -44,8 +61,11 @@ fn main() {
     let destination_path = std::env::args().nth(3).expect("path to destination folder");
     println!("destination_path: {:?}", destination_path);
 
-    let config_string = fs::read_to_string(config_path).expect("Unable to read config file");
-    let config: Config = parse(&config_string);
+    let watch = if let Some(arg) = std::env::args().nth(4) {
+        arg == "--watch"
+    } else {
+        false
+    };
 
     let mut template_glob = template_path.to_owned();
     template_glob.push_str("/**/*.tera");
@@ -60,12 +80,28 @@ fn main() {
 
     tera.register_filter("linebreaks", linebreaks);
 
-    fs::create_dir_all(destination_path).expect("failed to create the destination folder");
+    write(&config_path, &destination_path, &tera);
 
-    let context =
-        &Context::from_serialize(&config).expect("Faild to serialise the config into tera context");
-    let str = tera
-        .render("test.cairo.tera", &context)
-        .expect("unable to render template");
-    fs::write("generated/test.cairo", str).expect("Unable to write file");
+    if watch {
+        let copy_of_config_path = config_path.clone();
+        // Automatically select the best implementation for your platform.
+        let mut watcher = notify::recommended_watcher(move |res| match res {
+            Ok(event) => {
+                println!("event: {:?}", event);
+                _ = tera.full_reload();
+                write(&copy_of_config_path, &destination_path, &tera);
+            }
+            Err(e) => println!("watch error: {:?}", e),
+        })?;
+
+        // Add a path to be watched. All files and directories at that path and
+        // below will be monitored for changes.
+        watcher.watch(Path::new(template_path.as_str()), RecursiveMode::Recursive)?;
+        watcher.watch(Path::new(config_path.as_str()), RecursiveMode::NonRecursive)?;
+
+        println!("watching...");
+        io::stdin().read_line(&mut String::new()).unwrap();
+    }
+
+    Ok(())
 }
