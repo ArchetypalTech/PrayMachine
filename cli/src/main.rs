@@ -35,13 +35,22 @@ pub fn linebreaks(value: &Value, params: &HashMap<String, Value>) -> tera::Resul
 }
 
 fn main() {
-    let path = std::env::args().nth(1).expect("path to config file");
-    println!("path: {:?}", path);
+    let config_path = std::env::args().nth(1).expect("path to config file");
+    println!("path: {:?}", config_path);
 
-    let config_string = fs::read_to_string(path).expect("Unable to read config file");
+    let template_path = std::env::args().nth(2).expect("path to template folder");
+    println!("template_path: {:?}", template_path);
+
+    let destination_path = std::env::args().nth(3).expect("path to destination folder");
+    println!("destination_path: {:?}", destination_path);
+
+    let config_string = fs::read_to_string(config_path).expect("Unable to read config file");
     let config: Config = parse(&config_string);
 
-    let mut tera = match Tera::new("templates/**/*.tera") {
+    let mut template_glob = template_path.to_owned();
+    template_glob.push_str("/**/*.tera");
+
+    let mut tera = match Tera::new(template_glob.as_str()) {
         Ok(t) => t,
         Err(e) => {
             println!("Parsing error(s): {}", e);
@@ -51,7 +60,7 @@ fn main() {
 
     tera.register_filter("linebreaks", linebreaks);
 
-    fs::create_dir_all("generated").expect("failed to create the 'generated' folder");
+    fs::create_dir_all(destination_path).expect("failed to create the destination folder");
 
     let context =
         &Context::from_serialize(&config).expect("Faild to serialise the config into tera context");
