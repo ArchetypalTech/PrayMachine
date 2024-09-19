@@ -84,10 +84,12 @@ mod tests {
                 level_name: "test".into(),
                 rooms: vec![Room {
                     room_id: 1,
-                    exits: None,
+                    room_type: "Mountains".into(),
                     objects: None,
                     room_description: "fdd".into(),
                     room_name: "test1".into(),
+                    object_ids: [].into(),
+                    dir_obj_ids: [].into(),
                 }],
             }],
         };
