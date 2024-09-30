@@ -86,13 +86,16 @@ fn main() -> Result<(), ()> {
                             Tag::CodeBlock(d) => {
                                 state = State::Next;
                             }
-                            Tag::Paragraph => {
-                                if let Some(n) = room.description.chars().last() {
-                                    if n != '\n' {
-                                        room.description.push_str("\n");
+                            Tag::Paragraph => match state {
+                                State::Description => {
+                                    if let Some(n) = room.description.chars().last() {
+                                        if n != '\n' {
+                                            room.description.push_str("\n");
+                                        }
                                     }
                                 }
-                            }
+                                _ => {}
+                            },
                             _ => {}
                         }
                         println!("<{:?}>", tag);
