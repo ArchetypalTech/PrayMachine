@@ -1,5 +1,4 @@
-use pulldown_cmark::HeadingLevel;
-use pulldown_cmark::{Event, Parser, Tag, TextMergeStream};
+use pulldown_cmark::{Event, HeadingLevel, Parser, Tag, TagEnd, TextMergeStream};
 use std::collections::HashMap;
 use std::env;
 use std::fs;
@@ -31,6 +30,7 @@ enum State {
     None,
     Title,
     Description,
+    Next,
 }
 
 fn main() -> Result<(), ()> {
@@ -78,11 +78,21 @@ fn main() -> Result<(), ()> {
                                 &HeadingLevel::H1 => {
                                     state = State::Title;
                                 }
-                                &HeadingLevel::H2 => {
-                                    state = State::Description;
-                                }
+                                // &HeadingLevel::H2 => {
+                                //     state = State::Next;
+                                // }
                                 _ => {}
                             },
+                            Tag::CodeBlock(d) => {
+                                state = State::Next;
+                            }
+                            Tag::Paragraph => {
+                                if let Some(n) = room.description.chars().last() {
+                                    if n != '\n' {
+                                        room.description.push_str("\n");
+                                    }
+                                }
+                            }
                             _ => {}
                         }
                         println!("<{:?}>", tag);
@@ -92,6 +102,19 @@ fn main() -> Result<(), ()> {
                     Event::End(tag) => {
                         println!("</{:?}>", tag);
                         nesting_level -= 1;
+                        match &tag {
+                            TagEnd::Heading(level) => match level {
+                                &HeadingLevel::H1 => {
+                                    state = State::Description;
+                                }
+                                &HeadingLevel::H2 => {
+                                    // state = State::Description;
+                                }
+                                _ => {}
+                            },
+                            TagEnd::Paragraph => {}
+                            _ => {}
+                        }
                     }
                     Event::Text(text) => {
                         match state {
