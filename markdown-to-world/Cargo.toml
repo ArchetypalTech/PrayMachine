@@ -1,0 +1,11 @@
+[package]
+name = "letusprayfromfiles"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pulldown-cmark = "0.12.1"
+
+[[bin]]
+name = 'pray-from-files'
+path = 'src/main.rs'
