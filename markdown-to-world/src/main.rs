@@ -1,16 +1,118 @@
 use pray_engine::{serialize, Room};
 use pray_engine::{Config, Level};
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag, TagEnd, TextMergeStream};
-// use std::collections::HashMap;
 use std::env;
 use std::fs;
 use std::hash::{DefaultHasher, Hash, Hasher};
 
-enum State {
+#[derive(Debug)]
+enum States {
     None,
     Title,
     Description,
     Next,
+}
+
+#[derive(Debug)]
+struct State {
+    pub current: States,
+    pub room: Room,
+}
+
+impl State {
+    pub fn new(room_id: u64) -> State {
+        State {
+            current: States::None,
+            room: Room {
+                room_id: room_id,
+                room_name: "".to_string(),
+                room_description: "".to_string(),
+                room_type: "".to_string(),
+                objects: None,
+                object_ids: Vec::new(),
+                dir_obj_ids: Vec::new(),
+            },
+        }
+    }
+
+    pub fn after_event(self, event: &Event) -> Self {
+        match self.current {
+            States::None => self.none(event),
+            States::Title => self.title(event),
+            States::Description => self.description(event),
+            States::Next => self.next(event),
+            // States::End => panic!("Already Reached The End"),
+        }
+    }
+
+    fn none(mut self, event: &Event) -> Self {
+        match event {
+            Event::Start(tag) => match &tag {
+                Tag::Heading {
+                    level,
+                    id: _,
+                    classes: _,
+                    attrs: _,
+                } => match level {
+                    &HeadingLevel::H1 => self.current = States::Title,
+                    _ => {}
+                },
+                _ => {}
+            },
+            _ => {}
+        }
+        self
+    }
+    fn title(mut self, event: &Event) -> Self {
+        match event {
+            Event::Text(text) => {
+                self.room.room_name.push_str(text.to_string().as_str());
+            }
+            Event::End(tag) => match &tag {
+                TagEnd::Heading(level) => match level {
+                    &HeadingLevel::H1 => self.current = States::Description,
+                    _ => {}
+                },
+
+                _ => {}
+            },
+            _ => {}
+        }
+        self
+    }
+
+    fn description(mut self, event: &Event) -> Self {
+        match event {
+            Event::Start(tag) => match &tag {
+                Tag::Paragraph => {
+                    println!("paragraph");
+                    if let Some(n) = self.room.room_description.chars().last() {
+                        if n != '\n' {
+                            println!("not new line");
+                            self.room.room_description.push_str("\n");
+                        }
+                    }
+                }
+
+                Tag::CodeBlock(_) => self.current = States::Next,
+                _ => {}
+            },
+            Event::Text(text) => {
+                self.room
+                    .room_description
+                    .push_str(text.to_string().as_str());
+            }
+            _ => {}
+        }
+        self
+    }
+
+    fn next(self, _event: &Event) -> Self {
+        // match event {
+        //     _ => self.current = States::End,
+        // }
+        self
+    }
 }
 
 fn main() -> Result<(), ()> {
@@ -35,101 +137,29 @@ fn main() -> Result<(), ()> {
             let file_content = fs::read_to_string(&file_path).expect("Failed to read file");
 
             let room_id = calculate_hash(&file_path.to_str());
-
-            let mut room = Room {
-                room_id: room_id,
-                room_name: "".to_string(),
-                room_description: "".to_string(),
-                room_type: "".to_string(),
-                objects: None,
-                object_ids: Vec::new(),
-                dir_obj_ids: Vec::new(),
-            };
-
-            // Parse the file content here
-            // println!("File content: {}", file_content);
+            let mut state = State::new(room_id);
 
             let iterator = TextMergeStream::new(Parser::new(file_content.as_str()));
 
-            let mut max_nesting = 0;
-            let mut nesting_level = 0;
-
-            let mut state = State::None;
-
             for event in iterator {
-                match event {
+                match &event {
                     Event::Start(tag) => {
-                        match &tag {
-                            Tag::Heading {
-                                level,
-                                id,
-                                classes,
-                                attrs,
-                            } => match level {
-                                &HeadingLevel::H1 => {
-                                    state = State::Title;
-                                }
-                                // &HeadingLevel::H2 => {
-                                //     state = State::Next;
-                                // }
-                                _ => {}
-                            },
-                            Tag::CodeBlock(d) => {
-                                state = State::Next;
-                            }
-                            Tag::Paragraph => match state {
-                                State::Description => {
-                                    if let Some(n) = room.room_description.chars().last() {
-                                        if n != '\n' {
-                                            room.room_description.push_str("\n");
-                                        }
-                                    }
-                                }
-                                _ => {}
-                            },
-                            _ => {}
-                        }
                         println!("<{:?}>", tag);
-                        nesting_level += 1;
-                        max_nesting = std::cmp::max(max_nesting, nesting_level);
                     }
                     Event::End(tag) => {
                         println!("</{:?}>", tag);
-                        nesting_level -= 1;
-                        match &tag {
-                            TagEnd::Heading(level) => match level {
-                                &HeadingLevel::H1 => {
-                                    state = State::Description;
-                                }
-                                &HeadingLevel::H2 => {
-                                    // state = State::Description;
-                                }
-                                _ => {}
-                            },
-                            TagEnd::Paragraph => {}
-                            _ => {}
-                        }
                     }
                     Event::Text(text) => {
-                        match state {
-                            State::Title => {
-                                room.room_name.push_str(text.to_string().as_str());
-                            }
-                            State::Description => {
-                                room.room_description.push_str(text.to_string().as_str());
-                            }
-                            _ => {}
-                        }
-
                         println!("{}", text);
                     }
                     _ => {}
                 }
+                state = state.after_event(&event);
+
+                println!("STATE: {:?}", state.current);
             }
 
-            rooms.push(room);
-
-            println!("{:?}", max_nesting);
+            rooms.push(state.room);
         }
     }
 
