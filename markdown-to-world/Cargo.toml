@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 pulldown-cmark = "0.12.1"
+pray_engine = { path = "../parser" }
 
 [[bin]]
 name = 'pray-from-files'

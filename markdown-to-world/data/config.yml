@@ -1,0 +1,40 @@
+levels:
+- levelName: test
+  rooms:
+  - roomID: 2332678292465798608
+    roomName: Eli's Barn
+    roomDescription: |-
+      the barn is old and smells of old hay and oddly dissolution
+      the floor is dirt and trampled dried horse shit scattered with straw and broken bottles
+      the smell is not unpleasent and reminds you faintly of petrol and old socks
+    roomType: ''
+    objects: null
+    objectIds: []
+    dirObjIds: []
+  - roomID: 1582534770107146683
+    roomName: Walking Eagle Pass
+    roomDescription: |-
+      it winds through the mountains, the path is treacherous
+      toilet papered trees cover the steep
+      valley sides below you.
+      On closer inspection the TP might
+      be the remains of a cricket team
+      or perhaps a lost and very dead KKK picnic group.
+      It's brass monkeys.
+    roomType: ''
+    objects: null
+    objectIds: []
+    dirObjIds: []
+  - roomID: 8673458774416340489
+    roomName: Bensons plain
+    roomDescription: |-
+      the plain reaches seemingly endlessly to the sky in all directions
+      and the sky itself feels greasy and cold.
+      pyramidal rough shapes dot the horizin and land which
+      upon closer examination are made from bufalo skulls.
+      The air tastes of grease and bensons.
+      happy happy happy
+    roomType: ''
+    objects: null
+    objectIds: []
+    dirObjIds: []

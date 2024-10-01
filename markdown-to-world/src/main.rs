@@ -1,30 +1,10 @@
+use pray_engine::{serialize, Room};
+use pray_engine::{Config, Level};
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag, TagEnd, TextMergeStream};
-use std::collections::HashMap;
+// use std::collections::HashMap;
 use std::env;
 use std::fs;
-
-#[derive(Debug)]
-struct Room {
-    id: String,
-    name: String,
-    description: String,
-}
-
-struct PartialRoom {
-    id: String,
-    name: String,
-    description: String,
-}
-
-impl From<PartialRoom> for Room {
-    fn from(base: PartialRoom) -> Self {
-        Room {
-            id: base.id,
-            name: base.name,
-            description: base.description,
-        }
-    }
-}
+use std::hash::{DefaultHasher, Hash, Hasher};
 
 enum State {
     None,
@@ -34,11 +14,16 @@ enum State {
 }
 
 fn main() -> Result<(), ()> {
-    let rooms: HashMap<String, Room> = HashMap::new();
+    // let rooms: HashMap<String, Room> = HashMap::new();
+    let mut rooms: Vec<Room> = Vec::new();
 
     let dir_path = env::args()
         .nth(1)
         .expect("Please provide a path to the directory");
+
+    let config_path = env::args()
+        .nth(2)
+        .expect("Please provide a path to the config file to generate");
 
     let paths = fs::read_dir(&dir_path).expect("Failed to read directory");
 
@@ -49,10 +34,16 @@ fn main() -> Result<(), ()> {
         if file_path.is_file() {
             let file_content = fs::read_to_string(&file_path).expect("Failed to read file");
 
-            let mut room = PartialRoom {
-                id: file_path.to_str().unwrap().to_string(),
-                name: "".to_string(),
-                description: "".to_string(),
+            let room_id = calculate_hash(&file_path.to_str());
+
+            let mut room = Room {
+                room_id: room_id,
+                room_name: "".to_string(),
+                room_description: "".to_string(),
+                room_type: "".to_string(),
+                objects: None,
+                object_ids: Vec::new(),
+                dir_obj_ids: Vec::new(),
             };
 
             // Parse the file content here
@@ -88,9 +79,9 @@ fn main() -> Result<(), ()> {
                             }
                             Tag::Paragraph => match state {
                                 State::Description => {
-                                    if let Some(n) = room.description.chars().last() {
+                                    if let Some(n) = room.room_description.chars().last() {
                                         if n != '\n' {
-                                            room.description.push_str("\n");
+                                            room.room_description.push_str("\n");
                                         }
                                     }
                                 }
@@ -122,10 +113,10 @@ fn main() -> Result<(), ()> {
                     Event::Text(text) => {
                         match state {
                             State::Title => {
-                                room.name.push_str(text.to_string().as_str());
+                                room.room_name.push_str(text.to_string().as_str());
                             }
                             State::Description => {
-                                room.description.push_str(text.to_string().as_str());
+                                room.room_description.push_str(text.to_string().as_str());
                             }
                             _ => {}
                         }
@@ -136,14 +127,26 @@ fn main() -> Result<(), ()> {
                 }
             }
 
-            let room: Room = room.into();
-            println!("============================================");
-            println!("{:?}", room);
-            println!("============================================");
+            rooms.push(room);
 
             println!("{:?}", max_nesting);
         }
     }
 
+    let config_str = serialize(&Config {
+        levels: vec![Level {
+            level_name: "test".to_string(),
+            rooms: rooms,
+        }],
+    });
+
+    fs::write(config_path, config_str).expect("Unable to write file");
+
     Ok(())
+}
+
+fn calculate_hash<T: Hash>(t: &T) -> u64 {
+    let mut s = DefaultHasher::new();
+    t.hash(&mut s);
+    s.finish()
 }

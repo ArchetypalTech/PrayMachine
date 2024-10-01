@@ -4,65 +4,65 @@ use serde::{Deserialize, Serialize};
 #[serde(rename_all = "camelCase")]
 pub struct Effect {
     #[serde(rename = "roomID")]
-    room_id: Option<i64>,
+    pub room_id: Option<u64>,
     #[serde(rename = "objectID")]
-    object_id: Option<i64>,
+    pub object_id: Option<u64>,
     #[serde(rename = "actionID")]
-    action_id: i64,
+    pub action_id: u64,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Action {
     #[serde(rename = "actionID")]
-    action_id: i64,
+    pub action_id: u64,
     #[serde(rename = "type")]
-    ttype: String, // TODO enum?
-    enabled: bool,
-    revertable: bool,
-    d_bit_text: String,
-    d_bit: bool,
-    affects_action: Option<Effect>,
+    pub ttype: String, // TODO enum?
+    pub enabled: bool,
+    pub revertable: bool,
+    pub d_bit_text: String,
+    pub d_bit: bool,
+    pub affects_action: Option<Effect>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Object {
     #[serde(rename = "objID")]
-    obj_id: i64,
+    pub obj_id: u64,
     #[serde(rename = "type")]
-    ttype: String, // TODO enum ?
-    material: String, // TODO Enum
-    obj_description: String,
-    direction: Option<String>, // TODO Enum
-    destination: Option<String>,
-    actions: Option<Vec<Action>>,
+    pub ttype: String, // TODO enum ?
+    pub material: String, // TODO Enum
+    pub obj_description: String,
+    pub direction: Option<String>, // TODO Enum
+    pub destination: Option<String>,
+    pub actions: Option<Vec<Action>>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Room {
     #[serde(rename = "roomID")]
-    room_id: i64,
-    room_name: String,
-    room_description: String,
-    room_type: String,
-    objects: Option<Vec<Object>>,
-    object_ids: Vec<i64>,
-    dir_obj_ids: Vec<i64>,
+    pub room_id: u64,
+    pub room_name: String,
+    pub room_description: String,
+    pub room_type: String,
+    pub objects: Option<Vec<Object>>,
+    pub object_ids: Vec<u64>,
+    pub dir_obj_ids: Vec<u64>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Level {
-    level_name: String,
-    rooms: Vec<Room>,
+    pub level_name: String,
+    pub rooms: Vec<Room>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct Config {
-    levels: Vec<Level>,
+    pub levels: Vec<Level>,
 }
 
 pub fn parse(str: &String) -> Config {
