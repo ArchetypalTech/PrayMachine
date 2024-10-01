@@ -112,17 +112,31 @@ impl State {
         match event {
             Event::Text(text) => {
                 println!("YAML: {:?}", text.to_string());
+                self.current = States::Object;
             }
-            Event::Start(tag) => self.current = States::Object,
             _ => {}
         }
         self
     }
 
-    fn object(self, _event: &Event) -> Self {
-        // match event {
-        //     _ => self.current = States::End,
-        // }
+    fn object(mut self, event: &Event) -> Self {
+        match event {
+            Event::Start(tag) => match &tag {
+                Tag::Heading {
+                    level,
+                    id: _,
+                    classes: _,
+                    attrs: _,
+                } => match level {
+                    &HeadingLevel::H2 => {
+                        println!("NEW OBJECT");
+                    }
+                    _ => {}
+                },
+                _ => {}
+            },
+            _ => {} //self.current = States::End,
+        }
         self
     }
 }
@@ -172,6 +186,7 @@ fn main() -> Result<(), ()> {
             }
 
             rooms.push(state.room);
+            println!("====================================");
         }
     }
 
