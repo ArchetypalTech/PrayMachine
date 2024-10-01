@@ -10,7 +10,9 @@ enum States {
     None,
     Title,
     Description,
-    Next,
+    YAML,
+    Object,
+    End,
 }
 
 #[derive(Debug)]
@@ -40,8 +42,9 @@ impl State {
             States::None => self.none(event),
             States::Title => self.title(event),
             States::Description => self.description(event),
-            States::Next => self.next(event),
-            // States::End => panic!("Already Reached The End"),
+            States::YAML => self.yaml(event),
+            States::Object => self.object(event),
+            States::End => panic!("Already Reached The End"),
         }
     }
 
@@ -85,16 +88,14 @@ impl State {
         match event {
             Event::Start(tag) => match &tag {
                 Tag::Paragraph => {
-                    println!("paragraph");
                     if let Some(n) = self.room.room_description.chars().last() {
                         if n != '\n' {
-                            println!("not new line");
                             self.room.room_description.push_str("\n");
                         }
                     }
                 }
 
-                Tag::CodeBlock(_) => self.current = States::Next,
+                Tag::CodeBlock(_) => self.current = States::YAML,
                 _ => {}
             },
             Event::Text(text) => {
@@ -107,7 +108,18 @@ impl State {
         self
     }
 
-    fn next(self, _event: &Event) -> Self {
+    fn yaml(mut self, event: &Event) -> Self {
+        match event {
+            Event::Text(text) => {
+                println!("YAML: {:?}", text.to_string());
+            }
+            Event::Start(tag) => self.current = States::Object,
+            _ => {}
+        }
+        self
+    }
+
+    fn object(self, _event: &Event) -> Self {
         // match event {
         //     _ => self.current = States::End,
         // }
