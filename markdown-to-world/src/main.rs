@@ -1,4 +1,4 @@
-use pray_engine::{serialize, Object, Room};
+use pray_engine::{serialize, Action, Object, Room};
 use pray_engine::{Config, Level};
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag, TagEnd, TextMergeStream};
 use serde::{Deserialize, Serialize};
@@ -21,7 +21,11 @@ pub struct ObjectYaml {
     pub material: String,
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ActionYaml {}
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum RoomStateMachineStates {
     None,
     RoomName,
@@ -56,14 +60,20 @@ impl RoomStateMachine {
     }
 
     pub fn after_event(self, event: &Event) -> Self {
-        match self.state {
+        let previous_state = self.state.clone();
+        let s = match self.state {
             RoomStateMachineStates::None => self.none(event),
             RoomStateMachineStates::RoomName => self.room_name(event),
             RoomStateMachineStates::RoomDescription => self.room_description(event),
             RoomStateMachineStates::RoomYAML => self.room_yaml(event),
             RoomStateMachineStates::Object => self.object(event),
             RoomStateMachineStates::End => panic!("Already Reached The End"),
+        };
+
+        if previous_state != s.state {
+            println!("-------------------------------\nNEW ROOM STATE: {:?}\n-------------------------------", s.state)
         }
+        s
     }
 
     fn none(mut self, event: &Event) -> Self {
@@ -176,11 +186,11 @@ impl RoomStateMachine {
     }
 }
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum ObjectStateMachineStates {
-    ObjectTitle,
     ObjectDescription,
     ObjectYAML,
+    ObjectActions,
     End,
 }
 
@@ -188,6 +198,7 @@ enum ObjectStateMachineStates {
 struct ObjectStateMachine {
     pub state: ObjectStateMachineStates,
     pub object: Object,
+    pub current_action: Option<ActionStateMachine>,
 }
 
 impl ObjectStateMachine {
@@ -203,36 +214,26 @@ impl ObjectStateMachine {
                 obj_description: "".to_string(),
                 ttype: "".to_string(),
             },
+            current_action: None,
         }
     }
 
     pub fn after_event(self, event: &Event) -> Self {
-        match self.state {
-            ObjectStateMachineStates::ObjectTitle => self.title(event),
+        let previous_state = self.state.clone();
+        let s = match self.state {
             ObjectStateMachineStates::ObjectDescription => self.description(event),
             ObjectStateMachineStates::ObjectYAML => self.yaml(event),
+            ObjectStateMachineStates::ObjectActions => self.actions(event),
             ObjectStateMachineStates::End => panic!("Already Reached The End"),
-        }
-    }
+        };
 
-    fn title(mut self, event: &Event) -> Self {
-        match event {
-            Event::Text(text) => {
-                self.object
-                    .obj_description
-                    .push_str(text.to_string().as_str());
-            }
-            Event::End(tag) => match &tag {
-                TagEnd::Heading(level) => match level {
-                    &HeadingLevel::H2 => self.state = ObjectStateMachineStates::ObjectDescription,
-                    _ => {}
-                },
-
-                _ => {}
-            },
-            _ => {}
+        if previous_state != s.state {
+            println!(
+                "-------------------------------\n  -  NEW OBJECT STATE: {:?}\n-------------------------------",
+                s.state
+            )
         }
-        self
+        s
     }
 
     fn description(mut self, event: &Event) -> Self {
@@ -270,7 +271,147 @@ impl ObjectStateMachine {
                 if let Some(direction) = object_yaml.direction {
                     self.object.direction = Some(direction)
                 }
-                self.state = ObjectStateMachineStates::End
+                self.state = ObjectStateMachineStates::ObjectActions
+            }
+            _ => {}
+        }
+        self
+    }
+
+    fn actions(mut self, event: &Event) -> Self {
+        if let Some(action_state_machine) = self.current_action {
+            let new_state = action_state_machine.after_event(&event);
+            if new_state.state == ActionStateMachineStates::End {
+                println!("------------------------------_END ----------------------------");
+                let obj = new_state.action;
+                self.current_action = None;
+                if let Some(ref mut vector) = self.object.actions {
+                    vector.push(obj);
+                }
+            } else {
+                self.current_action = Some(new_state);
+            }
+        } else {
+            match event {
+                Event::Start(tag) => match &tag {
+                    Tag::Heading {
+                        level,
+                        id: _,
+                        classes: _,
+                        attrs: _,
+                    } => match level {
+                        &HeadingLevel::H2 => {
+                            // TODO action_id
+                            self.current_action = Some(ActionStateMachine::new(0))
+                        }
+                        _ => {}
+                    },
+                    _ => {}
+                },
+                _ => {} //self.current = States::End,
+            }
+        }
+
+        self
+    }
+}
+
+#[derive(Debug, PartialEq, Eq, Clone, Copy)]
+enum ActionStateMachineStates {
+    ActionEffectDescription,
+    ActionYAML,
+    End,
+}
+
+#[derive(Debug)]
+struct ActionStateMachine {
+    pub state: ActionStateMachineStates,
+    pub action: Action,
+}
+
+impl ActionStateMachine {
+    pub fn new(action_id: u64) -> ActionStateMachine {
+        ActionStateMachine {
+            state: ActionStateMachineStates::ActionEffectDescription,
+            action: Action {
+                action_id: action_id,
+                affects_action: None,
+                d_bit: false,
+                d_bit_text: "".to_string(),
+                enabled: true,
+                revertable: false,
+                ttype: "".to_string(),
+            },
+        }
+    }
+
+    pub fn after_event(self, event: &Event) -> Self {
+        let previous_state = self.state.clone();
+        let s = match self.state {
+            ActionStateMachineStates::ActionEffectDescription => self.effect_description(event),
+            ActionStateMachineStates::ActionYAML => self.yaml(event),
+            ActionStateMachineStates::End => panic!("Already Reached The End"),
+        };
+
+        if previous_state != s.state {
+            println!(
+                "-------------------------------\n  -  -  NEW ACTION STATE: {:?}\n-------------------------------",
+                s.state
+            )
+        }
+        s
+    }
+
+    fn effect_description(mut self, event: &Event) -> Self {
+        match event {
+            Event::Start(tag) => match &tag {
+                Tag::Paragraph => {
+                    if let Some(n) = self.action.d_bit_text.chars().last() {
+                        if n != '\n' {
+                            self.action.d_bit_text.push_str("\n");
+                        }
+                    }
+                }
+
+                Tag::Link {
+                    link_type,
+                    dest_url,
+                    title,
+                    id,
+                } => {
+                    println!("Link!")
+                }
+
+                Tag::CodeBlock(kind) => self.state = ActionStateMachineStates::ActionYAML,
+
+                _ => {}
+            },
+
+            Event::End(tag) => match &tag {
+                TagEnd::Link => self.state = ActionStateMachineStates::End,
+
+                _ => {}
+            },
+            Event::Text(text) => {
+                self.action.d_bit_text.push_str(text.to_string().as_str());
+            }
+            _ => {}
+        }
+        self
+    }
+
+    fn yaml(mut self, event: &Event) -> Self {
+        match event {
+            Event::Text(text) => {
+                let action_yaml: ActionYaml =
+                    serde_yml::from_str(&text.to_string()).expect("failed to parse yaml config");
+                // TODO
+                // self.object.material = action_yaml.material;
+                // self.object.ttype = action_yaml.ttype;
+                // if let Some(direction) = action_yaml.direction {
+                //     self.object.direction = Some(direction)
+                // }
+                self.state = ActionStateMachineStates::End
             }
             _ => {}
         }
