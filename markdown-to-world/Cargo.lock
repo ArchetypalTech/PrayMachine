@@ -57,6 +57,8 @@ version = "0.1.0"
 dependencies = [
  "pray_engine",
  "pulldown-cmark",
+ "serde",
+ "serde_yml",
 ]
 
 [[package]]

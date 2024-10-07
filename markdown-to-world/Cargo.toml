@@ -6,6 +6,8 @@ edition = "2021"
 [dependencies]
 pulldown-cmark = "0.12.1"
 pray_engine = { path = "../parser" }
+serde = { version = "1.0", features = ["derive"] }
+serde_yml = "0.0.12"
 
 [[bin]]
 name = 'pray-from-files'
