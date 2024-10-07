@@ -13,7 +13,7 @@ pub struct RoomYaml {
 }
 
 #[derive(Debug)]
-enum States {
+enum RoomStateMachineStates {
     None,
     RoomName,
     RoomDescription,
@@ -23,16 +23,16 @@ enum States {
 }
 
 #[derive(Debug)]
-struct StateMachine {
-    pub state: States,
+struct RoomStateMachine {
+    pub state: RoomStateMachineStates,
     pub room: Room,
     pub current_object: Option<Object>,
 }
 
-impl StateMachine {
-    pub fn new(room_id: u64) -> StateMachine {
-        StateMachine {
-            state: States::None,
+impl RoomStateMachine {
+    pub fn new(room_id: u64) -> RoomStateMachine {
+        RoomStateMachine {
+            state: RoomStateMachineStates::None,
             room: Room {
                 room_id: room_id,
                 room_name: "".to_string(),
@@ -48,12 +48,12 @@ impl StateMachine {
 
     pub fn after_event(self, event: &Event) -> Self {
         match self.state {
-            States::None => self.none(event),
-            States::RoomName => self.room_name(event),
-            States::RoomDescription => self.room_description(event),
-            States::RoomYAML => self.room_yaml(event),
-            States::Object => self.object(event),
-            States::End => panic!("Already Reached The End"),
+            RoomStateMachineStates::None => self.none(event),
+            RoomStateMachineStates::RoomName => self.room_name(event),
+            RoomStateMachineStates::RoomDescription => self.room_description(event),
+            RoomStateMachineStates::RoomYAML => self.room_yaml(event),
+            RoomStateMachineStates::Object => self.object(event),
+            RoomStateMachineStates::End => panic!("Already Reached The End"),
         }
     }
 
@@ -66,7 +66,7 @@ impl StateMachine {
                     classes: _,
                     attrs: _,
                 } => match level {
-                    &HeadingLevel::H1 => self.state = States::RoomName,
+                    &HeadingLevel::H1 => self.state = RoomStateMachineStates::RoomName,
                     _ => {}
                 },
                 _ => {}
@@ -82,7 +82,7 @@ impl StateMachine {
             }
             Event::End(tag) => match &tag {
                 TagEnd::Heading(level) => match level {
-                    &HeadingLevel::H1 => self.state = States::RoomDescription,
+                    &HeadingLevel::H1 => self.state = RoomStateMachineStates::RoomDescription,
                     _ => {}
                 },
 
@@ -104,7 +104,7 @@ impl StateMachine {
                     }
                 }
 
-                Tag::CodeBlock(_) => self.state = States::RoomYAML,
+                Tag::CodeBlock(_) => self.state = RoomStateMachineStates::RoomYAML,
                 _ => {}
             },
             Event::Text(text) => {
@@ -123,7 +123,7 @@ impl StateMachine {
                 let room_yaml: RoomYaml =
                     serde_yml::from_str(&text.to_string()).expect("failed to parse yaml config");
                 self.room.room_type = room_yaml.room_type;
-                self.state = States::Object
+                self.state = RoomStateMachineStates::Object
             }
             _ => {}
         }
@@ -182,7 +182,7 @@ fn main() -> Result<(), ()> {
             let file_content = fs::read_to_string(&file_path).expect("Failed to read file");
 
             let room_id = calculate_hash(&file_path.to_str());
-            let mut state_machine = StateMachine::new(room_id);
+            let mut state_machine = RoomStateMachine::new(room_id);
 
             let iterator = TextMergeStream::new(Parser::new(file_content.as_str()));
 
