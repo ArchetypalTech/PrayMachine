@@ -12,7 +12,7 @@ pub struct RoomYaml {
     pub room_type: String,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Eq)]
 enum RoomStateMachineStates {
     None,
     RoomName,
@@ -26,7 +26,7 @@ enum RoomStateMachineStates {
 struct RoomStateMachine {
     pub state: RoomStateMachineStates,
     pub room: Room,
-    pub current_object: Option<Object>,
+    pub current_object: Option<ObjectStateMachine>,
 }
 
 impl RoomStateMachine {
@@ -131,31 +131,102 @@ impl RoomStateMachine {
     }
 
     fn object(mut self, event: &Event) -> Self {
-        match event {
-            Event::Start(tag) => match &tag {
-                Tag::Heading {
-                    level,
-                    id: _,
-                    classes: _,
-                    attrs: _,
-                } => match level {
-                    &HeadingLevel::H2 => {
-                        println!("NEW OBJECT");
-                        self.current_object = Some(Object {
-                            obj_id: 0, // TODO
-                            actions: None,
-                            destination: None,
-                            direction: None,
-                            material: "".to_string(),
-                            obj_description: "".to_string(),
-                            ttype: "".to_string(),
-                        })
-                    }
+        if let Some(object_state_machine) = self.current_object {
+            let new_state = object_state_machine.after_event(&event);
+            if new_state.state == ObjectStateMachineStates::End {
+                let obj = new_state.object;
+                self.current_object = None;
+                if let Some(ref mut vector) = self.room.objects {
+                    vector.push(obj);
+                }
+            } else {
+                self.current_object = Some(new_state);
+            }
+        } else {
+            match event {
+                Event::Start(tag) => match &tag {
+                    Tag::Heading {
+                        level,
+                        id: _,
+                        classes: _,
+                        attrs: _,
+                    } => match level {
+                        &HeadingLevel::H2 => {
+                            // TODO object_id
+                            self.current_object = Some(ObjectStateMachine::new(0))
+                        }
+                        _ => {}
+                    },
                     _ => {}
                 },
+                _ => {} //self.current = States::End,
+            }
+        }
+
+        self
+    }
+}
+
+#[derive(Debug, PartialEq, Eq)]
+enum ObjectStateMachineStates {
+    ObjectDescription,
+    ObjectYAML,
+    End,
+}
+
+#[derive(Debug)]
+struct ObjectStateMachine {
+    pub state: ObjectStateMachineStates,
+    pub object: Object,
+}
+
+impl ObjectStateMachine {
+    pub fn new(object_id: u64) -> ObjectStateMachine {
+        ObjectStateMachine {
+            state: ObjectStateMachineStates::ObjectDescription,
+            object: Object {
+                obj_id: object_id,
+                actions: None,
+                destination: None,
+                direction: None,
+                material: "".to_string(),
+                obj_description: "".to_string(),
+                ttype: "".to_string(),
+            },
+        }
+    }
+
+    pub fn after_event(self, event: &Event) -> Self {
+        match self.state {
+            ObjectStateMachineStates::ObjectDescription => self.description(event),
+            ObjectStateMachineStates::ObjectYAML => self.yaml(event),
+            ObjectStateMachineStates::End => panic!("Already Reached The End"),
+        }
+    }
+
+    fn description(mut self, event: &Event) -> Self {
+        match event {
+            Event::Text(text) => {
+                self.object
+                    .obj_description
+                    .push_str(text.to_string().as_str());
+            }
+            Event::End(tag) => match &tag {
+                TagEnd::Heading(level) => match level {
+                    &HeadingLevel::H2 => self.state = ObjectStateMachineStates::End,
+                    _ => {}
+                },
+
                 _ => {}
             },
-            _ => {} //self.current = States::End,
+            _ => {}
+        }
+        self
+    }
+
+    fn yaml(mut self, event: &Event) -> Self {
+        match event {
+            _ => {}
         }
         self
     }
