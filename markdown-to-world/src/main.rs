@@ -12,6 +12,15 @@ pub struct RoomYaml {
     pub room_type: String,
 }
 
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ObjectYaml {
+    pub direction: Option<String>,
+    #[serde(rename = "type")]
+    pub ttype: String,
+    pub material: String,
+}
+
 #[derive(Debug, PartialEq, Eq)]
 enum RoomStateMachineStates {
     None,
@@ -169,6 +178,7 @@ impl RoomStateMachine {
 
 #[derive(Debug, PartialEq, Eq)]
 enum ObjectStateMachineStates {
+    ObjectTitle,
     ObjectDescription,
     ObjectYAML,
     End,
@@ -198,13 +208,14 @@ impl ObjectStateMachine {
 
     pub fn after_event(self, event: &Event) -> Self {
         match self.state {
+            ObjectStateMachineStates::ObjectTitle => self.title(event),
             ObjectStateMachineStates::ObjectDescription => self.description(event),
             ObjectStateMachineStates::ObjectYAML => self.yaml(event),
             ObjectStateMachineStates::End => panic!("Already Reached The End"),
         }
     }
 
-    fn description(mut self, event: &Event) -> Self {
+    fn title(mut self, event: &Event) -> Self {
         match event {
             Event::Text(text) => {
                 self.object
@@ -213,7 +224,7 @@ impl ObjectStateMachine {
             }
             Event::End(tag) => match &tag {
                 TagEnd::Heading(level) => match level {
-                    &HeadingLevel::H2 => self.state = ObjectStateMachineStates::End,
+                    &HeadingLevel::H2 => self.state = ObjectStateMachineStates::ObjectDescription,
                     _ => {}
                 },
 
@@ -224,8 +235,43 @@ impl ObjectStateMachine {
         self
     }
 
+    fn description(mut self, event: &Event) -> Self {
+        match event {
+            Event::Start(tag) => match &tag {
+                Tag::Paragraph => {
+                    if let Some(n) = self.object.obj_description.chars().last() {
+                        if n != '\n' {
+                            self.object.obj_description.push_str("\n");
+                        }
+                    }
+                }
+
+                Tag::CodeBlock(kind) => self.state = ObjectStateMachineStates::ObjectYAML,
+
+                _ => {}
+            },
+            Event::Text(text) => {
+                self.object
+                    .obj_description
+                    .push_str(text.to_string().as_str());
+            }
+            _ => {}
+        }
+        self
+    }
+
     fn yaml(mut self, event: &Event) -> Self {
         match event {
+            Event::Text(text) => {
+                let object_yaml: ObjectYaml =
+                    serde_yml::from_str(&text.to_string()).expect("failed to parse yaml config");
+                self.object.material = object_yaml.material;
+                self.object.ttype = object_yaml.ttype;
+                if let Some(direction) = object_yaml.direction {
+                    self.object.direction = Some(direction)
+                }
+                self.state = ObjectStateMachineStates::End
+            }
             _ => {}
         }
         self
