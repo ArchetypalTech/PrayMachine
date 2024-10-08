@@ -5,6 +5,15 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::hash::{DefaultHasher, Hash, Hasher};
 use std::{env, vec};
+mod types;
+use std::path::{Path, PathBuf};
+use types::{IntermediaryAction, IntermediaryEffect, IntermediaryObject, IntermediaryRoom};
+
+fn get_relative_path(root: &Path, file: &Path) -> Option<PathBuf> {
+    let root = root.canonicalize().ok()?;
+    let file = file.canonicalize().ok()?;
+    file.strip_prefix(root).ok().map(|p| p.to_path_buf())
+}
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -21,17 +30,6 @@ pub struct ObjectYaml {
     pub material: String,
 }
 
-// #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
-// #[serde(rename_all = "camelCase")]
-// pub struct EffectYaml {
-//     #[serde(rename = "roomID")]
-//     pub room_id: Option<u64>,
-//     #[serde(rename = "objectID")]
-//     pub object_id: Option<u64>,
-//     #[serde(rename = "actionID")]
-//     pub action_id: u64,
-// }
-
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct ActionYaml {
@@ -40,7 +38,7 @@ pub struct ActionYaml {
     pub enabled: Option<bool>,
     pub revertable: Option<bool>,
     pub d_bit: Option<bool>,
-    pub affects_action: Option<Effect>,
+    pub affects: Option<IntermediaryEffect>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
@@ -56,7 +54,7 @@ enum RoomStateMachineStates {
 #[derive(Debug)]
 struct RoomStateMachine {
     pub state: RoomStateMachineStates,
-    pub room: Room,
+    pub room: IntermediaryRoom,
     pub current_object: Option<ObjectStateMachine>,
 }
 
@@ -64,7 +62,7 @@ impl RoomStateMachine {
     pub fn new(room_id: u64) -> RoomStateMachine {
         RoomStateMachine {
             state: RoomStateMachineStates::None,
-            room: Room {
+            room: IntermediaryRoom {
                 room_id: room_id,
                 room_name: "".to_string(),
                 room_description: "".to_string(),
@@ -230,7 +228,7 @@ enum ObjectStateMachineStates {
 #[derive(Debug)]
 struct ObjectStateMachine {
     pub state: ObjectStateMachineStates,
-    pub object: Object,
+    pub object: IntermediaryObject,
     pub current_action: Option<ActionStateMachine>,
 }
 
@@ -238,7 +236,7 @@ impl ObjectStateMachine {
     pub fn new(object_id: u64) -> ObjectStateMachine {
         ObjectStateMachine {
             state: ObjectStateMachineStates::ObjectDescription,
-            object: Object {
+            object: IntermediaryObject {
                 obj_id: object_id,
                 actions: Some(vec![]),
                 destination: None,
@@ -383,7 +381,7 @@ enum ActionStateMachineStates {
 #[derive(Debug)]
 struct ActionStateMachine {
     pub state: ActionStateMachineStates,
-    pub action: Action,
+    pub action: IntermediaryAction,
     pub destination: Option<String>,
 }
 
@@ -391,7 +389,7 @@ impl ActionStateMachine {
     pub fn new(action_id: u64) -> ActionStateMachine {
         ActionStateMachine {
             state: ActionStateMachineStates::ActionEffectDescription,
-            action: Action {
+            action: IntermediaryAction {
                 action_id: action_id,
                 affects_action: None,
                 d_bit: true,
@@ -467,7 +465,51 @@ impl ActionStateMachine {
                 let action_yaml: ActionYaml =
                     serde_yml::from_str(&text.to_string()).expect("failed to parse yaml config");
 
-                self.action.affects_action = action_yaml.affects_action;
+                let affects = action_yaml.affects;
+                // if let Some(affect) = affects {
+                //     // let room_id = if let Some(room_name) = affect.room {
+                //     //     calculate_room_id(&room_name)
+                //     // } else {
+                //     //     3 // self.room_id
+                //     // };
+                //     // let object_id = if let Some(id) = affect.object_id {
+                //     //     id
+                //     // } else {
+                //     //     if let Some(index) = affect.object_index {
+                //     //         1 // self.room.objects[index].obj_id
+                //     //     } else {
+                //     //         3 // self.object_id
+                //     //     }
+                //     // };
+                //     // let action_id = if let Some(id) = affect.action_id {
+                //     //     id
+                //     // } else {
+                //     //     if let Some(index) = affect.action_index {
+                //     //         1 // self.room.objects[index].obj_id
+                //     //     } else {
+                //     //         3 // self.object_id
+                //     //     }
+                //     // };
+                //     // self.action.affects_action = Some(Effect {
+                //     //     room_id: Some(room_id),
+                //     //     object_id: Some(object_id),
+                //     //     action_id: action_id,
+                //     // })
+
+                //     let action_id = if let Some(id) = affect.action_id {
+                //         id
+                //     } else {
+                //         if let Some(index) = affect.action_index {
+                //             1 // self.room.objects[index].obj_id
+                //         } else {
+                //             3 // self.object_id
+                //         }
+                //     };
+
+                //     self.action.affects_action = Some(eff)
+                // }
+
+                self.action.affects_action = affects;
                 if let Some(d_bit) = action_yaml.d_bit {
                     self.action.d_bit = d_bit;
                 } else {
@@ -515,7 +557,14 @@ fn main() -> Result<(), ()> {
         if file_path.is_file() {
             let file_content = fs::read_to_string(&file_path).expect("Failed to read file");
 
-            let room_id = calculate_room_id(&file_path.to_str());
+            let roon_id_string = get_relative_path(Path::new(&dir_path), &file_path)
+                .unwrap()
+                .to_str()
+                .unwrap()
+                .to_string();
+            println!("{:?} => {:?}", file_path, roon_id_string);
+
+            let room_id = calculate_room_id(&roon_id_string);
             let mut state_machine = RoomStateMachine::new(room_id);
             println!("= = = =");
             println!("ROOM {:?}", state_machine.state.clone());
@@ -547,7 +596,7 @@ fn main() -> Result<(), ()> {
 
             if let Some(objects) = &mut state_machine.room.objects {
                 for object in objects {
-                    if let Some(destination) = &object.destination {
+                    if let Some(_destination) = &object.destination {
                         state_machine.room.dir_obj_ids.push(object.obj_id);
                     } else {
                         state_machine.room.object_ids.push(object.obj_id);
@@ -555,7 +604,85 @@ fn main() -> Result<(), ()> {
                 }
             }
 
-            rooms.push(state_machine.room);
+            let iroom = state_machine.room;
+            let mut room = Room {
+                room_id: iroom.room_id,
+                room_name: iroom.room_name,
+                room_description: iroom.room_description,
+                room_type: iroom.room_type,
+                objects: Some(vec![]),
+                object_ids: iroom.object_ids,
+                dir_obj_ids: iroom.dir_obj_ids,
+            };
+
+            if let Some(iobjetcs) = iroom.objects {
+                let mut objects: Vec<Object> = vec![];
+                for iobj in &iobjetcs {
+                    let mut actions: Vec<Action> = vec![];
+                    if let Some(iactions) = &iobj.actions {
+                        for iaction in iactions {
+                            let effect = if let Some(ieffect) = &iaction.affects_action {
+                                let room_id = if let Some(room_name) = &ieffect.room {
+                                    calculate_room_id(&room_name)
+                                } else {
+                                    iroom.room_id
+                                };
+                                let object_id = if let Some(id) = ieffect.object_id {
+                                    id
+                                } else {
+                                    if let Some(index) = ieffect.object_index {
+                                        let index: usize = index.try_into().unwrap();
+                                        iobjetcs[index].obj_id
+                                    } else {
+                                        iobj.obj_id
+                                    }
+                                };
+                                let action_id = if let Some(id) = ieffect.action_id {
+                                    id
+                                } else {
+                                    if let Some(index) = ieffect.action_index {
+                                        let index: usize = index.try_into().unwrap();
+                                        iactions[index].action_id
+                                    } else {
+                                        panic!("need action_index or action_id");
+                                    }
+                                };
+
+                                Some(Effect {
+                                    room_id: Some(room_id),
+                                    object_id: Some(object_id),
+                                    action_id: action_id,
+                                })
+                            } else {
+                                None
+                            };
+                            let action = Action {
+                                action_id: iaction.action_id,
+                                affects_action: effect,
+                                d_bit: iaction.d_bit,
+                                d_bit_text: iaction.d_bit_text.clone(),
+                                enabled: iaction.enabled,
+                                revertable: iaction.revertable,
+                                ttype: iaction.ttype.clone(),
+                            };
+                            actions.push(action);
+                        }
+                        let object = Object {
+                            actions: Some(actions),
+                            destination: iobj.destination.clone(),
+                            direction: iobj.direction.clone(),
+                            material: iobj.material.clone(),
+                            obj_description: iobj.obj_description.clone(),
+                            obj_id: iobj.obj_id,
+                            ttype: iobj.ttype.clone(),
+                        };
+                        objects.push(object);
+                    }
+                }
+                room.objects = Some(objects);
+            }
+
+            rooms.push(room);
             println!("====================================");
         }
     }
