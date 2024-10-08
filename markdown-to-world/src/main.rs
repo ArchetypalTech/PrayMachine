@@ -150,18 +150,24 @@ impl RoomStateMachine {
     }
 
     fn object(mut self, event: &Event) -> Self {
+        let mut match_event = true;
         if let Some(object_state_machine) = self.current_object {
+            match_event = false;
             let new_state = object_state_machine.after_event(&event);
             if new_state.state == ObjectStateMachineStates::End {
                 let obj = new_state.object;
+                println!("ADD OBJECT: {:?}", obj);
                 self.current_object = None;
                 if let Some(ref mut vector) = self.room.objects {
                     vector.push(obj);
                 }
+                match_event = true;
             } else {
                 self.current_object = Some(new_state);
             }
-        } else {
+        }
+
+        if match_event {
             match event {
                 Event::Start(tag) => match &tag {
                     Tag::Heading {
@@ -207,7 +213,7 @@ impl ObjectStateMachine {
             state: ObjectStateMachineStates::ObjectDescription,
             object: Object {
                 obj_id: object_id,
-                actions: None,
+                actions: Some(vec![]),
                 destination: None,
                 direction: None,
                 material: "".to_string(),
@@ -279,19 +285,24 @@ impl ObjectStateMachine {
     }
 
     fn actions(mut self, event: &Event) -> Self {
+        let mut match_event = true;
         if let Some(action_state_machine) = self.current_action {
+            match_event = false;
             let new_state = action_state_machine.after_event(&event);
             if new_state.state == ActionStateMachineStates::End {
-                println!("------------------------------_END ----------------------------");
-                let obj = new_state.action;
+                println!("------------------------------ACTION_END ----------------------------");
+                let action = new_state.action;
+                println!("ADD ACTION: {:?}", action);
                 self.current_action = None;
                 if let Some(ref mut vector) = self.object.actions {
-                    vector.push(obj);
+                    vector.push(action);
                 }
+                match_event = true;
             } else {
                 self.current_action = Some(new_state);
             }
-        } else {
+        }
+        if match_event {
             match event {
                 Event::Start(tag) => match &tag {
                     Tag::Heading {
@@ -300,10 +311,11 @@ impl ObjectStateMachine {
                         classes: _,
                         attrs: _,
                     } => match level {
-                        &HeadingLevel::H2 => {
+                        &HeadingLevel::H4 => {
                             // TODO action_id
                             self.current_action = Some(ActionStateMachine::new(0))
                         }
+                        &HeadingLevel::H2 => self.state = ObjectStateMachineStates::End,
                         _ => {}
                     },
                     _ => {}
@@ -389,6 +401,7 @@ impl ActionStateMachine {
 
             Event::End(tag) => match &tag {
                 TagEnd::Link => self.state = ActionStateMachineStates::End,
+                TagEnd::CodeBlock => self.state = ActionStateMachineStates::End,
 
                 _ => {}
             },
