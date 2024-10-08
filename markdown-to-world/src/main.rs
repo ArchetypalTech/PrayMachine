@@ -71,7 +71,9 @@ impl RoomStateMachine {
         };
 
         if previous_state != s.state {
-            println!("-------------------------------\nNEW ROOM STATE: {:?}\n-------------------------------", s.state)
+            println!("= = = =");
+            println!("ROOM {:?}", s.state);
+            println!("= = = =");
         }
         s
     }
@@ -156,7 +158,6 @@ impl RoomStateMachine {
             let new_state = object_state_machine.after_event(&event);
             if new_state.state == ObjectStateMachineStates::End {
                 let obj = new_state.object;
-                println!("ADD OBJECT: {:?}", obj);
                 self.current_object = None;
                 if let Some(ref mut vector) = self.room.objects {
                     vector.push(obj);
@@ -178,7 +179,12 @@ impl RoomStateMachine {
                     } => match level {
                         &HeadingLevel::H2 => {
                             // TODO object_id
-                            self.current_object = Some(ObjectStateMachine::new(0))
+                            let sm = ObjectStateMachine::new(0);
+                            let state = sm.state.clone();
+                            self.current_object = Some(sm);
+                            println!("= = = =");
+                            println!("OBJECT {:?}", state);
+                            println!("= = = =");
                         }
                         _ => {}
                     },
@@ -234,10 +240,9 @@ impl ObjectStateMachine {
         };
 
         if previous_state != s.state {
-            println!(
-                "-------------------------------\n  -  NEW OBJECT STATE: {:?}\n-------------------------------",
-                s.state
-            )
+            println!("= = = =");
+            println!("OBJECT {:?}", s.state);
+            println!("= = = =");
         }
         s
     }
@@ -290,9 +295,7 @@ impl ObjectStateMachine {
             match_event = false;
             let new_state = action_state_machine.after_event(&event);
             if new_state.state == ActionStateMachineStates::End {
-                println!("------------------------------ACTION_END ----------------------------");
                 let action = new_state.action;
-                println!("ADD ACTION: {:?}", action);
                 self.current_action = None;
                 if let Some(ref mut vector) = self.object.actions {
                     vector.push(action);
@@ -313,7 +316,12 @@ impl ObjectStateMachine {
                     } => match level {
                         &HeadingLevel::H4 => {
                             // TODO action_id
-                            self.current_action = Some(ActionStateMachine::new(0))
+                            let sm = ActionStateMachine::new(0);
+                            let state = sm.state.clone();
+                            self.current_action = Some(sm);
+                            println!("= = = =");
+                            println!("ACTION {:?}", state);
+                            println!("= = = =");
                         }
                         &HeadingLevel::H2 => self.state = ObjectStateMachineStates::End,
                         _ => {}
@@ -366,10 +374,9 @@ impl ActionStateMachine {
         };
 
         if previous_state != s.state {
-            println!(
-                "-------------------------------\n  -  -  NEW ACTION STATE: {:?}\n-------------------------------",
-                s.state
-            )
+            println!("= = = =");
+            println!("ACTION: {:?}", s.state);
+            println!("= = = =");
         }
         s
     }
@@ -391,7 +398,7 @@ impl ActionStateMachine {
                     title,
                     id,
                 } => {
-                    println!("Link!")
+                    // TODO
                 }
 
                 Tag::CodeBlock(kind) => self.state = ActionStateMachineStates::ActionYAML,
@@ -454,6 +461,9 @@ fn main() -> Result<(), ()> {
 
             let room_id = calculate_hash(&file_path.to_str());
             let mut state_machine = RoomStateMachine::new(room_id);
+            println!("= = = =");
+            println!("ROOM {:?}", state_machine.state.clone());
+            println!("= = = =");
 
             let iterator = TextMergeStream::new(Parser::new(file_content.as_str()));
 
@@ -471,8 +481,6 @@ fn main() -> Result<(), ()> {
                     _ => {}
                 }
                 state_machine = state_machine.after_event(&event);
-
-                println!("STATE: {:?}", state_machine.state);
             }
 
             rooms.push(state_machine.room);
