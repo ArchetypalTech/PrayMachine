@@ -1,4 +1,4 @@
-use pray_engine::{serialize, Action, Object, Room};
+use pray_engine::{serialize, Action, Effect, Object, Room};
 use pray_engine::{Config, Level};
 use pulldown_cmark::{Event, HeadingLevel, Parser, Tag, TagEnd, TextMergeStream};
 use serde::{Deserialize, Serialize};
@@ -21,9 +21,27 @@ pub struct ObjectYaml {
     pub material: String,
 }
 
+// #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+// #[serde(rename_all = "camelCase")]
+// pub struct EffectYaml {
+//     #[serde(rename = "roomID")]
+//     pub room_id: Option<u64>,
+//     #[serde(rename = "objectID")]
+//     pub object_id: Option<u64>,
+//     #[serde(rename = "actionID")]
+//     pub action_id: u64,
+// }
+
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
 #[serde(rename_all = "camelCase")]
-pub struct ActionYaml {}
+pub struct ActionYaml {
+    #[serde(rename = "type")]
+    pub ttype: String, // TODO enum?
+    pub enabled: Option<bool>,
+    pub revertable: Option<bool>,
+    pub d_bit: Option<bool>,
+    pub affects_action: Option<Effect>,
+}
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 enum RoomStateMachineStates {
@@ -301,6 +319,13 @@ impl ObjectStateMachine {
                     vector.push(action);
                 }
                 match_event = true;
+                if let Some(destination) = new_state.destination {
+                    if let Some(current_destination) = self.object.destination {
+                        panic!("only one destination per object for now");
+                    } else {
+                        self.object.destination = Some(destination);
+                    }
+                }
             } else {
                 self.current_action = Some(new_state);
             }
@@ -347,6 +372,7 @@ enum ActionStateMachineStates {
 struct ActionStateMachine {
     pub state: ActionStateMachineStates,
     pub action: Action,
+    pub destination: Option<String>,
 }
 
 impl ActionStateMachine {
@@ -362,6 +388,7 @@ impl ActionStateMachine {
                 revertable: false,
                 ttype: "".to_string(),
             },
+            destination: None,
         }
     }
 
@@ -398,7 +425,8 @@ impl ActionStateMachine {
                     title,
                     id,
                 } => {
-                    // TODO
+                    self.action.d_bit_text = title.to_string();
+                    self.destination = Some(dest_url.to_string());
                 }
 
                 Tag::CodeBlock(kind) => self.state = ActionStateMachineStates::ActionYAML,
@@ -425,12 +453,27 @@ impl ActionStateMachine {
             Event::Text(text) => {
                 let action_yaml: ActionYaml =
                     serde_yml::from_str(&text.to_string()).expect("failed to parse yaml config");
-                // TODO
-                // self.object.material = action_yaml.material;
-                // self.object.ttype = action_yaml.ttype;
-                // if let Some(direction) = action_yaml.direction {
-                //     self.object.direction = Some(direction)
-                // }
+
+                self.action.affects_action = action_yaml.affects_action;
+                if let Some(d_bit) = action_yaml.d_bit {
+                    self.action.d_bit = d_bit;
+                } else {
+                    self.action.d_bit = true;
+                }
+
+                if let Some(enabled) = action_yaml.enabled {
+                    self.action.enabled = enabled;
+                } else {
+                    self.action.enabled = true;
+                }
+                if let Some(revertable) = action_yaml.revertable {
+                    self.action.revertable = revertable;
+                } else {
+                    self.action.revertable = false;
+                }
+
+                self.action.ttype = action_yaml.ttype;
+
                 self.state = ActionStateMachineStates::End
             }
             _ => {}
