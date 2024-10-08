@@ -539,6 +539,12 @@ fn main() -> Result<(), ()> {
                 state_machine = state_machine.after_event(&event);
             }
 
+            if let Some(obj_sm) = state_machine.current_object {
+                if let Some(ref mut vector) = state_machine.room.objects {
+                    vector.push(obj_sm.object);
+                }
+            }
+
             rooms.push(state_machine.room);
             println!("====================================");
         }
