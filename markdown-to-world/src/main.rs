@@ -545,6 +545,16 @@ fn main() -> Result<(), ()> {
                 }
             }
 
+            if let Some(objects) = &mut state_machine.room.objects {
+                for object in objects {
+                    if let Some(destination) = &object.destination {
+                        state_machine.room.dir_obj_ids.push(object.obj_id);
+                    } else {
+                        state_machine.room.object_ids.push(object.obj_id);
+                    }
+                }
+            }
+
             rooms.push(state_machine.room);
             println!("====================================");
         }
