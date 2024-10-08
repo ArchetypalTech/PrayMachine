@@ -196,8 +196,11 @@ impl RoomStateMachine {
                         attrs: _,
                     } => match level {
                         &HeadingLevel::H2 => {
-                            // TODO object_id
-                            let sm = ObjectStateMachine::new(0);
+                            let object_id = calculate_object_id(
+                                self.room.room_id.clone(),
+                                self.room.objects.clone().unwrap().len().try_into().unwrap(),
+                            );
+                            let sm = ObjectStateMachine::new(object_id);
                             let state = sm.state.clone();
                             self.current_object = Some(sm);
                             println!("= = = =");
@@ -340,8 +343,17 @@ impl ObjectStateMachine {
                         attrs: _,
                     } => match level {
                         &HeadingLevel::H4 => {
-                            // TODO action_id
-                            let sm = ActionStateMachine::new(0);
+                            let action_id = calculate_object_id(
+                                self.object.obj_id.clone(),
+                                self.object
+                                    .actions
+                                    .clone()
+                                    .unwrap()
+                                    .len()
+                                    .try_into()
+                                    .unwrap(),
+                            );
+                            let sm = ActionStateMachine::new(action_id);
                             let state = sm.state.clone();
                             self.current_action = Some(sm);
                             println!("= = = =");
@@ -382,7 +394,7 @@ impl ActionStateMachine {
             action: Action {
                 action_id: action_id,
                 affects_action: None,
-                d_bit: false,
+                d_bit: true,
                 d_bit_text: "".to_string(),
                 enabled: true,
                 revertable: false,
@@ -427,6 +439,7 @@ impl ActionStateMachine {
                 } => {
                     self.action.d_bit_text = title.to_string();
                     self.destination = Some(dest_url.to_string());
+                    self.action.ttype = "open".to_string();
                 }
 
                 Tag::CodeBlock(kind) => self.state = ActionStateMachineStates::ActionYAML,
@@ -502,7 +515,7 @@ fn main() -> Result<(), ()> {
         if file_path.is_file() {
             let file_content = fs::read_to_string(&file_path).expect("Failed to read file");
 
-            let room_id = calculate_hash(&file_path.to_str());
+            let room_id = calculate_room_id(&file_path.to_str());
             let mut state_machine = RoomStateMachine::new(room_id);
             println!("= = = =");
             println!("ROOM {:?}", state_machine.state.clone());
@@ -543,8 +556,22 @@ fn main() -> Result<(), ()> {
     Ok(())
 }
 
-fn calculate_hash<T: Hash>(t: &T) -> u64 {
+fn calculate_room_id<T: Hash>(t: &T) -> u64 {
     let mut s = DefaultHasher::new();
     t.hash(&mut s);
+    s.finish()
+}
+
+fn calculate_object_id(room_id: u64, index: u64) -> u64 {
+    let mut s = DefaultHasher::new();
+    room_id.hash(&mut s);
+    index.hash(&mut s);
+    s.finish()
+}
+
+fn calculate_action_id(object_id: u64, index: u64) -> u64 {
+    let mut s = DefaultHasher::new();
+    object_id.hash(&mut s);
+    index.hash(&mut s);
     s.finish()
 }
