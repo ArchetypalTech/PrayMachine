@@ -50,7 +50,7 @@ enum RoomStateMachineStates {
     RoomDescription,
     RoomYAML,
     Object,
-    End,
+    // End,
 }
 
 #[derive(Debug)]
@@ -85,7 +85,7 @@ impl RoomStateMachine {
             RoomStateMachineStates::RoomDescription => self.room_description(event),
             RoomStateMachineStates::RoomYAML => self.room_yaml(event),
             RoomStateMachineStates::Object => self.object(event),
-            RoomStateMachineStates::End => panic!("Already Reached The End"),
+            // RoomStateMachineStates::End => panic!("Already Reached The End"),
         };
 
         if previous_state != s.state {
@@ -279,7 +279,7 @@ impl ObjectStateMachine {
                     }
                 }
 
-                Tag::CodeBlock(kind) => self.state = ObjectStateMachineStates::ObjectYAML,
+                Tag::CodeBlock(_kind) => self.state = ObjectStateMachineStates::ObjectYAML,
 
                 _ => {}
             },
@@ -323,7 +323,7 @@ impl ObjectStateMachine {
                 }
                 match_event = true;
                 if let Some(destination) = new_state.destination {
-                    if let Some(current_destination) = self.object.destination {
+                    if let Some(_current_destination) = self.object.destination {
                         panic!("only one destination per object for now");
                     } else {
                         self.object.destination = Some(destination);
@@ -343,7 +343,7 @@ impl ObjectStateMachine {
                         attrs: _,
                     } => match level {
                         &HeadingLevel::H4 => {
-                            let action_id = calculate_object_id(
+                            let action_id = calculate_action_id(
                                 self.object.obj_id.clone(),
                                 self.object
                                     .actions
@@ -432,17 +432,17 @@ impl ActionStateMachine {
                 }
 
                 Tag::Link {
-                    link_type,
+                    link_type: _,
                     dest_url,
                     title,
-                    id,
+                    id: _,
                 } => {
                     self.action.d_bit_text = title.to_string();
                     self.destination = Some(dest_url.to_string());
                     self.action.ttype = "open".to_string();
                 }
 
-                Tag::CodeBlock(kind) => self.state = ActionStateMachineStates::ActionYAML,
+                Tag::CodeBlock(_kind) => self.state = ActionStateMachineStates::ActionYAML,
 
                 _ => {}
             },
