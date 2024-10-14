@@ -299,7 +299,16 @@ impl ObjectStateMachine {
                 self.object.material = object_yaml.material;
                 self.object.ttype = object_yaml.ttype;
                 if let Some(direction) = object_yaml.direction {
-                    self.object.direction = Some(direction)
+                    self.object.direction = Some(
+                        match direction.as_str() {
+                            "North" => "N",
+                            "East" => "E",
+                            "South" => "S",
+                            "West" => "W",
+                            _ => panic!("invalid direction: {}", direction),
+                        }
+                        .to_string(),
+                    );
                 }
                 self.state = ObjectStateMachineStates::ObjectActions
             }

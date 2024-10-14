@@ -13,7 +13,7 @@ levels:
       type: door
       material: wood
       objDescription: an old wooden barn door, leads south
-      direction: South
+      direction: S
       destination: bensons-plain.md
       actions:
       - actionID: 4328927602301159032
@@ -27,7 +27,7 @@ levels:
       type: window
       material: glass
       objDescription: a dusty window, at chest height
-      direction: West
+      direction: W
       destination: elis-forge.md
       actions:
       - actionID: 14604306511083742153
@@ -64,7 +64,7 @@ levels:
       type: path
       material: dirt
       objDescription: path
-      direction: West
+      direction: W
       destination: bensons-plain.md
       actions:
       - actionID: 14833044636746871315
@@ -92,7 +92,7 @@ levels:
       type: path
       material: dirt
       objDescription: a path east leads upwards toward the mountains
-      direction: East
+      direction: E
       destination: walking-eagle-pass.md
       actions:
       - actionID: 16668157595971844890
@@ -106,7 +106,7 @@ levels:
       type: path
       material: dirt
       objDescription: a path north leads toward a large wooden barn
-      direction: North
+      direction: 'N'
       destination: elis-barn.md
       actions:
       - actionID: 13058015828559547750
