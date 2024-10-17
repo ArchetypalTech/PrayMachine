@@ -15,7 +15,7 @@ This tool will parse a directory of markdown file to generate a config.yml file
 1. build it
 
 ```
-cd cli
+cd markdown-to-world
 cargo build
 ```
 
@@ -23,7 +23,7 @@ cargo build
 
 2. add it to your path
 
-(the binary is located at [./cli/target/debug/pray-from-files](./cli/target/debug/pray-from-files))
+(the binary is located at [./markdown-to-world/target/debug/markdown-to-world](./markdown-to-world/target/debug/markdown-to-world))
 
 3. execute it
 
