@@ -1,3 +1,4 @@
+use glob::glob;
 use notify::{RecursiveMode, Result, Watcher};
 use pray_engine::parse;
 use pray_engine::Config;
@@ -9,6 +10,23 @@ use std::str::FromStr;
 use tera::Context;
 use tera::Tera;
 use tera::Value;
+
+fn get_file_list(parent_dir: &str, pattern: &str) -> Result<Vec<String>> {
+    let mut file_list = Vec::new();
+
+    for entry in glob(&pattern).expect("invalid pattern") {
+        match entry {
+            Ok(path) => {
+                if let Ok(relative_path) = path.strip_prefix(parent_dir) {
+                    file_list.push(relative_path.to_string_lossy().into_owned());
+                }
+            }
+            Err(e) => eprintln!("Error: {:?}", e),
+        }
+    }
+
+    Ok(file_list)
+}
 
 /// Convert line breaks
 pub fn linebreaks(value: &Value, params: &HashMap<String, Value>) -> tera::Result<Value> {
@@ -37,21 +55,27 @@ pub fn linebreaks(value: &Value, params: &HashMap<String, Value>) -> tera::Resul
     ))
 }
 
-fn write(config_path: &String, destination_path: &String, tera: &Tera) {
+fn write(config_path: &String, destination_path: &String, tera: &Tera, files: &Vec<String>) {
     fs::create_dir_all(destination_path).expect("failed to create the destination folder");
 
     let config_string = fs::read_to_string(config_path).expect("Unable to read config file");
     let config: Config = parse(&config_string);
 
-    let mut destination_file_path = destination_path.to_owned();
-    destination_file_path.push_str("spawner.cairo"); // TODO
+    for file in files {
+        let destination_file_name = file
+            .strip_suffix(".tera")
+            .expect("failted to remove .tera extension to file name");
+        let mut destination_file_path = destination_path.to_owned();
+        destination_file_path.push_str("/");
+        destination_file_path.push_str(destination_file_name); // TODO
 
-    let context =
-        &Context::from_serialize(&config).expect("Faild to serialise the config into tera context");
-    let str = tera
-        .render("spawner.cairo.tera", &context) // TODO
-        .expect("unable to render template");
-    fs::write(destination_file_path, str).expect("Unable to write file");
+        let context = &Context::from_serialize(&config)
+            .expect("Faild to serialise the config into tera context");
+        let str = tera
+            .render(file, &context) // TODO
+            .expect("unable to render template");
+        fs::write(destination_file_path, str).expect("Unable to write file");
+    }
 }
 
 fn main() -> Result<()> {
@@ -70,7 +94,7 @@ fn main() -> Result<()> {
         false
     };
 
-    let mut template_glob = template_path.to_owned();
+    let mut template_glob = template_path.clone();
     template_glob.push_str("/**/*.tera");
 
     let mut tera = match Tera::new(template_glob.as_str()) {
@@ -83,7 +107,12 @@ fn main() -> Result<()> {
 
     tera.register_filter("linebreaks", linebreaks);
 
-    write(&config_path, &destination_path, &tera);
+    let files =
+        get_file_list(&template_path, &template_glob).expect("failed to get files from glob");
+
+    println!("{:?}", &files);
+
+    write(&config_path, &destination_path, &tera, &files);
 
     if watch {
         let copy_of_config_path = config_path.clone();
@@ -92,7 +121,7 @@ fn main() -> Result<()> {
             Ok(event) => {
                 println!("event: {:?}", event);
                 _ = tera.full_reload();
-                write(&copy_of_config_path, &destination_path, &tera);
+                write(&copy_of_config_path, &destination_path, &tera, &files);
             }
             Err(e) => println!("watch error: {:?}", e),
         })?;
