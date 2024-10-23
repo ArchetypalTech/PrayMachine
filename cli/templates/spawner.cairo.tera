@@ -28,15 +28,81 @@
   zrk::ObjectType::Ball
   {%- elif t == "door" -%}
   zrk::ObjectType::Door
+  {%- elif t == "stairs" -%}
+  zrk::ObjectType::Stairs
+  {%- elif t == "place" -%}
+  zrk::ObjectType::Place
+  {%- elif t == "troll" -%}
+  zrk::ObjectType::Troll
+  {%- elif t == "chest" -%}
+  zrk::ObjectType::Chest
+  {%- elif t == "box" -%}
+  zrk::ObjectType::Box
+  {%- elif t == "matches" -%}
+  zrk::ObjectType::Matches
+  {%- elif t == "can" -%}
+  zrk::ObjectType::Can
+  {%- elif t == "dynamite" -%}
+  zrk::ObjectType::Dynamite
+  {%- elif t == "boulder" -%}
+  zrk::ObjectType::Boulder
+  {%- elif t == "bale" -%}
+  zrk::ObjectType::Bale
+  {%- elif t == "petrol" -%}
+  zrk::ObjectType::Petrol
   {%- else -%}UNKNOWN OBJECT TYPE{%- endif -%}
 {%- endmacro objectType -%}
 {%- macro actionType(t) -%}
-  {%- if t == "open" -%}
-  zrk::ActionType::Open
+  {%- if t == "move" -%}
+  zrk::ActionType::Move
+  {%- elif t == "look" -%}
+  zrk::ActionType::Look
   {%- elif t == "kick" -%}
   zrk::ActionType::Kick
-  {%- elif t == "break" -%}
+  {%- elif t == "hit" -%}
+  zrk::ActionType::Hit
+  {%- elif t == "drink" -%}
+  zrk::ActionType::Drink
+  {%- elif t == "Fight" -%}
+  zrk::ActionType::Fight
+  {%- elif t == "Sleep" -%}
+  zrk::ActionType::Sleep
+  {%- elif t == "Smash" -%}
+  zrk::ActionType::Smash
+  {%- elif t == "Pray" -%}
+  zrk::ActionType::Pray
+  {%- elif t == "Open" -%}
+  zrk::ActionType::Open
+  {%- elif t == "Break" -%}
   zrk::ActionType::Break
+  {%- elif t == "Burn" -%}
+  zrk::ActionType::Burn
+  {%- elif t == "Light" -%}
+  zrk::ActionType::Light
+  {%- elif t == "Spawn" -%}
+  zrk::ActionType::Spawn
+  {%- elif t == "Take" -%}
+  zrk::ActionType::Take
+  {%- elif t == "Help" -%}
+  zrk::ActionType::Help
+  {%- elif t == "Pour" -%}
+  zrk::ActionType::Pour
+  {%- elif t == "Follow" -%}
+  zrk::ActionType::Follow
+  {%- elif t == "Jump" -%}
+  zrk::ActionType::Jump
+  {%- elif t == "Block" -%}
+  zrk::ActionType::Block
+  {%- elif t == "Soak" -%}
+  zrk::ActionType::Soak
+  {%- elif t == "Empty" -%}
+  zrk::ActionType::Empty
+  {%- elif t == "Explode" -%}
+  zrk::ActionType::Explode
+  {%- elif t == "Disintegrate" -%}
+  zrk::ActionType::Disintegrate
+  {%- elif t == "Close" -%}
+  zrk::ActionType::Close
   {%- else -%}UNKNOWN ACTION TYPE{%- endif -%}
 {%- endmacro actionType -%}
 {%- macro materialType(m) -%}
