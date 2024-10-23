@@ -112,6 +112,7 @@ impl RoomStateMachine {
         }
         self
     }
+
     fn room_name(mut self, event: &Event) -> Self {
         match event {
             Event::Text(text) => {
@@ -669,7 +670,7 @@ fn main() -> Result<(), ()> {
                             };
                             let action = Action {
                                 action_id: iaction.action_id,
-                                affects_action: effect,
+                                affects_action: effect.map(|effect| effect.action_id),
                                 d_bit: iaction.d_bit,
                                 d_bit_text: iaction.d_bit_text.clone(),
                                 enabled: iaction.enabled,
