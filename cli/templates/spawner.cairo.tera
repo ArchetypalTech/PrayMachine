@@ -106,23 +106,59 @@
   {%- else -%}UNKNOWN ACTION TYPE{%- endif -%}
 {%- endmacro actionType -%}
 {%- macro materialType(m) -%}
-  {%- if m == "dirt" -%}
-  zrk::MaterialType::Dirt
-  {%- elif m == "glass" -%}
-  zrk::MaterialType::Glass
-  {%- elif m == "leather" -%}
-  zrk::MaterialType::Leather
   {%- elif m == "wood" -%}
   zrk::MaterialType::Wood
+  {%- if m == "dirt" -%}
+  zrk::MaterialType::Dirt
+  {%- elif m == "stone" -%}
+  zrk::MaterialType::Stone
+  {%- elif m == "flesh" -%}
+  zrk::MaterialType::Flesh
+  {%- elif m == "glass" -%}
+  zrk::MaterialType::Glass
+  {%- elif m == "ikea" -%}
+  zrk::MaterialType::IKEA
+  {%- elif m == "iron" -%}
+  zrk::MaterialType::Iron
+  {%- elif m == "shit" -%}
+  zrk::MaterialType::Shit
+  {%- elif m == "mud" -%}
+  zrk::MaterialType::Mud
+  {%- elif m == "leather" -%}
+  zrk::MaterialType::Leather
+  {%- elif m == "metal" -%}
+  zrk::MaterialType::Metal
+  {%- elif m == "tnt" -%}
+  zrk::MaterialType::TNT
+  {%- elif m == "hay" -%}
+  zrk::MaterialType::Hay
   {%- else -%}UNKNOWN MATERIAL TYPE{%- endif -%}
 {%- endmacro materialType -%}
 {%- macro roomType(r) -%}
-  {%- if r == "plain" -%}
+  {%- if r == "WoodCabin" -%}
+  zrk::RoomType::WoodCabin
+  {%- elif r == "Store" -%}
+  zrk::RoomType::Store
+  {%- elif r == "Cavern" -%}
+  zrk::RoomType::Cavern
+  {%- elif r == "StoneCabin" -%}
+  zrk::RoomType::StoneCabin
+  {%- elif r == "Fort" -%}
+  zrk::RoomType::Fort
+  {%- elif r == "Room" -%}
+  zrk::RoomType::Room
+  {%- elif r == "Plain" -%}
   zrk::RoomType::Plain
-  {%- elif r == "mountains" -%}
+  {%- elif r == "Mountains" -%}
   zrk::RoomType::Mountains
-  {%- elif r == "barn" -%}
+  {%- elif r == "Barn" -%}
   zrk::RoomType::Barn
+  {%- elif r == "Forge" -%}
+  zrk::RoomType::Forge
+  {%- elif r == "Pass" -%}
+  zrk::RoomType::Pass
+  {%- elif r == "Alley" -%}
+  zrk::RoomType::Alley
   {%- else -%}UNKNOWN ROOM TYPE{%- endif -%}
 {%- endmacro roomType -%}
 
