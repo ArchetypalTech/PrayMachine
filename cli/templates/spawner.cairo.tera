@@ -8,7 +8,12 @@
     zrk::DirectionType::West
     {%- elif dir == "N" -%}
     zrk::DirectionType::North
-    {%- else -%}UNKNOWN DIRECTION
+    {%- elif dir == "U" -%}
+    zrk::DirectionType::Up
+    {%- elif dir == "D" -%}
+    zrk::DirectionType::Down
+    {%- else -%}
+    UNKNOWN DIRECTION
     {%- endif -%}
   {%- else -%}
   zrk::DirectionType::None

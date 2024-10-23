@@ -22,7 +22,8 @@ pub struct Action {
     pub revertable: bool,
     pub d_bit_text: String,
     pub d_bit: bool,
-    pub affects_action: Option<Effect>,
+    // pub affects_action: Option<Effect>,
+    pub affects_action: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -34,7 +35,7 @@ pub struct Object {
     pub ttype: String, // TODO enum ?
     pub material: String, // TODO Enum
     pub obj_description: String,
-    pub direction: Option<String>, // TODO Enum
+    pub direction: Option<String>, // TODO Enu
     pub destination: Option<String>,
     pub actions: Option<Vec<Action>>,
 }

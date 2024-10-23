@@ -305,6 +305,8 @@ impl ObjectStateMachine {
                             "East" => "E",
                             "South" => "S",
                             "West" => "W",
+                            "Up" => "U",
+                            "Down" => "D",
                             _ => panic!("invalid direction: {}", direction),
                         }
                         .to_string(),
