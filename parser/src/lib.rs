@@ -22,7 +22,6 @@ pub struct Action {
     pub revertable: bool,
     pub d_bit_text: String,
     pub d_bit: bool,
-    // pub affects_action: Option<Effect>,
     pub affects_action: Option<u64>,
 }
 
