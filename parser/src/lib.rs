@@ -47,6 +47,7 @@ pub struct Room {
     pub room_name: String,
     pub room_description: String,
     pub room_type: String,
+    pub biome_type: String,
     pub objects: Option<Vec<Object>>,
     pub object_ids: Vec<u64>,
     pub dir_obj_ids: Vec<u64>,
