@@ -19,6 +19,7 @@ fn get_relative_path(root: &Path, file: &Path) -> Option<PathBuf> {
 #[serde(rename_all = "camelCase")]
 pub struct RoomYaml {
     pub room_type: String,
+    pub biome_type: String,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -162,6 +163,7 @@ impl RoomStateMachine {
                 let room_yaml: RoomYaml =
                     serde_yml::from_str(&text.to_string()).expect("failed to parse yaml config");
                 self.room.room_type = room_yaml.room_type;
+                self.room.biome_type = room_yaml.biome_type;
                 self.state = RoomStateMachineStates::Object
             }
             _ => {}
@@ -450,7 +452,7 @@ impl ActionStateMachine {
                 } => {
                     self.action.d_bit_text = title.to_string();
                     self.destination = Some(dest_url.to_string());
-                    self.action.ttype = "open".to_string();
+                    self.action.ttype = "Open".to_string();
                 }
 
                 Tag::CodeBlock(_kind) => self.state = ActionStateMachineStates::ActionYAML,
@@ -601,7 +603,8 @@ fn main() -> Result<(), ()> {
                 state_machine = state_machine.after_event(&event);
             }
 
-            if let Some(obj_sm) = state_machine.current_object {
+            if let Some(obj_sm) = state_machine.current_object 
+            {
                 if let Some(ref mut vector) = state_machine.room.objects {
                     vector.push(obj_sm.object);
                 }
