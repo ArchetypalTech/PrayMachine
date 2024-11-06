@@ -13,15 +13,16 @@ The air tastes of grease and bensons.
 happy happy happy
 
 ```yaml
-roomType: "plain"
+roomType: "Plain"
+biomeType: "Prarie"
 ```
 
 ## a path east leads upwards toward the mountains
 
 ```yaml
 direction: East
-type: "path"
-material: "dirt"
+type: "Path"
+material: "Dirt"
 ```
 
 ### actions:
@@ -32,8 +33,8 @@ material: "dirt"
 
 ```yaml
 direction: North
-type: "path"
-material: "dirt"
+type: "Path"
+material: "Dirt"
 ```
 
 ### actions:
@@ -49,8 +50,8 @@ not exactly a sphere
 but you can kick it
 
 ```yaml
-type: "ball"
-material: leather
+type: "Ball"
+material: "Leather"
 ```
 
 ### actions
@@ -58,5 +59,5 @@ material: leather
 #### the ball bounces feebly and rolls into some dog shit. fun.
 
 ```yaml
-type: kick
+type: "Kick"
 ```
