@@ -23,7 +23,7 @@ cargo build
 
 2. add it to your path
 
-(the binary is located at [./markdown-to-world/target/debug/markdown-to-world](./markdown-to-world/target/debug/markdown-to-world))
+(the binary should be [./markdown-to-world/target/debug/markdown-to-world](./markdown-to-world/target/debug/pray-from-files))
 
 3. execute it
 
